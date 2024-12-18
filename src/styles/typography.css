@@ -1,0 +1,114 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /* Base typography */
+  html {
+    @apply text-charcoal-600 bg-cream-50;
+    font-feature-settings: "liga" 1, "kern" 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Headings */
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display text-charcoal-800;
+  }
+
+  h1 {
+    @apply text-5xl md:text-6xl lg:text-7xl leading-tight;
+  }
+
+  h2 {
+    @apply text-3xl md:text-4xl lg:text-5xl leading-tight;
+  }
+
+  h3 {
+    @apply text-2xl md:text-3xl leading-snug;
+  }
+
+  /* Body text */
+  p {
+    @apply font-serif text-base md:text-lg leading-relaxed;
+  }
+
+  /* Links */
+  a {
+    @apply text-sepia-600 transition-colors duration-200;
+  }
+
+  a:hover {
+    @apply text-sepia-700;
+  }
+}
+
+@layer components {
+  /* Editorial components */
+  .editorial-heading {
+    @apply relative pb-6 mb-12;
+  }
+
+  .editorial-heading::after {
+    content: "";
+    @apply absolute bottom-0 left-0 w-16 h-px bg-gradient-to-r from-sepia-400 to-transparent;
+  }
+
+  .editorial-quote {
+    @apply relative pl-6 border-l-2 border-sepia-200 italic text-charcoal-700;
+  }
+
+  /* Section layouts */
+  .section-container {
+    @apply max-w-7xl mx-auto px-6 lg:px-8 py-16 md:py-24;
+  }
+
+  .content-wrapper {
+    @apply bg-white rounded-xl shadow-elegant p-8 md:p-12 lg:p-16;
+  }
+
+  /* Image treatments */
+  .image-frame {
+    @apply relative rounded-lg overflow-hidden shadow-image;
+  }
+
+  .image-frame img {
+    @apply w-full h-full object-cover transition-transform duration-700;
+  }
+
+  .image-frame:hover img {
+    @apply scale-105;
+  }
+
+  /* Interactive elements */
+  .btn-primary {
+    @apply bg-sepia-500 text-white px-8 py-3 rounded-lg 
+           shadow-sm hover:bg-sepia-600 
+           transition-all duration-200 transform hover:-translate-y-0.5;
+  }
+
+  .btn-secondary {
+    @apply bg-cream-200 text-charcoal-700 px-6 py-2 rounded-lg
+           hover:bg-cream-300 transition-colors duration-200;
+  }
+
+  /* Form elements */
+  .input-elegant {
+    @apply w-full border-charcoal-200 rounded-lg 
+           focus:border-sepia-400 focus:ring focus:ring-sepia-200 focus:ring-opacity-50
+           transition-colors duration-200;
+  }
+
+  .textarea-elegant {
+    @apply input-elegant resize-none;
+  }
+
+  /* Decorative elements */
+  .decorative-line {
+    @apply w-full h-px bg-gradient-subtle from-sepia-300/30 my-12;
+  }
+
+  .decorative-border {
+    @apply border border-cream-300/50 rounded-xl p-0.5;
+  }
+} 

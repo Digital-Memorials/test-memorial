@@ -3,6 +3,8 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
+import './styles/tailwind.css'; // Has @tailwind base, etc.
+import './styles/typography.css'; // Uses @layer base
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(

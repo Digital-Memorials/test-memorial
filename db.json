@@ -1,0 +1,76 @@
+{
+  "users": [
+    {
+      "id": "1310",
+      "name": "Dean Crowley",
+      "email": "deancrowley1@gmail.com",
+      "password": "pass"
+    }
+  ],
+  "memories": [
+    {
+      "id": "3",
+      "userId": "guest",
+      "name": "Sarah O'Connor",
+      "message": "This photo was taken during one of Professor Smith's famous summer BBQs in 1985. I remember him telling stories about growing up in Tramore while serving his legendary homemade brown bread. His hospitality and warmth made everyone feel like family.",
+      "mediaType": "image",
+      "mediaUrl": "image1.jpg"
+    },
+    {
+      "id": "4",
+      "userId": "guest",
+      "name": "Patrick Murphy",
+      "message": "This moment captures John's love for teaching the next generation. He wasn't just showing us how to fish - he was teaching patience, persistence, and the joy of simple pleasures. A lesson I've carried with me all my life.",
+      "mediaType": "image",
+      "mediaUrl": "image2.jpg"
+    },
+    {
+      "id": "5",
+      "userId": "guest",
+      "name": "Mary Fitzgerald",
+      "message": "This photo always makes me laugh! Our car got stuck in the sand at Tramore Beach in 1980. Instead of getting frustrated, John turned it into an impromptu engineering lesson for everyone who came to help. That was just his way - finding teaching moments in every situation.",
+      "mediaType": "image",
+      "mediaUrl": "image3.jpg"
+    },
+    {
+      "id": "6",
+      "userId": "guest",
+      "name": "James Kennedy",
+      "message": "Christmas 1987 at the Smith household was always special. John would lead us all in singing traditional Irish carols, and his face would light up when the grandchildren joined in. This photo captures one of those magical evenings perfectly.",
+      "mediaType": "image",
+      "mediaUrl": "image4.jpg"
+    },
+    {
+      "id": "7",
+      "userId": "guest",
+      "name": "Siobhan Walsh",
+      "message": "I took this photo of John in his beloved garden last spring. He spent countless hours there, telling me it reminded him of his father's garden in the old family home. Every plant had a story, and he knew them all. His passion for nurturing growth extended far beyond the classroom.",
+      "mediaType": "image",
+      "mediaUrl": "image6.jpg"
+    },
+    {
+      "id": "8904",
+      "userId": "1310",
+      "name": "Dean Crowley",
+      "message": "Look at this!",
+      "mediaType": "video",
+      "mediaUrl": "https://v.ftcdn.net/07/22/93/91/700_F_722939147_oNrNJgTEi7nOVzXJAmlTW4qi0gaatV22_ST.mp4"
+    }
+  ],
+  "condolences": [
+    {
+      "id": "1",
+      "userId": "guest",
+      "name": "Emily Wilson",
+      "relation": "Former Student",
+      "message": "My deepest sympathies to the Smith family. Professor Smith's wisdom and kindness touched so many lives, including mine."
+    },
+    {
+      "id": "2",
+      "userId": "guest",
+      "name": "Robert Martinez",
+      "relation": "Colleague",
+      "message": "John was not just a colleague but a dear friend. His dedication to education and his students was truly inspiring. He will be deeply missed."
+    }
+  ]
+}
