@@ -3,5 +3,6 @@ export interface Condolence {
   userId: string;
   userName: string;
   text: string;
+  relation: string;
   createdAt: string;
 } 

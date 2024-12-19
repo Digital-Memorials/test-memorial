@@ -169,26 +169,38 @@ export const getCondolences = async (): Promise<{ data: Condolence[] }> => {
           'Accept': 'application/json'
         }
       }
-    }) as any;
-    
-    // Handle AWS API Gateway response
-    if (response?.data) {
-      return { data: Array.isArray(response.data) ? response.data : [] };
-    }
+    });
 
-    if (response?.body) {
-      // If body is a ReadableStream
-      if (typeof response.body.json === 'function') {
-        const jsonData = await response.body.json();
-        return { data: Array.isArray(jsonData) ? jsonData : [] };
+    const parseCondolences = (data: any): Condolence[] => {
+      if (Array.isArray(data)) {
+        return data.filter(isCondolence);
       }
-      // If body is already parsed
-      return { data: Array.isArray(response.body) ? response.body : [] };
-    }
+      return [];
+    };
 
-    // Handle direct response
-    if (Array.isArray(response)) {
-      return { data: response };
+    // Handle different response formats
+    if (response && typeof response === 'object') {
+      // If response has data property
+      if ('data' in response) {
+        return { data: parseCondolences(response.data) };
+      }
+
+      // If response has body
+      if ('body' in response) {
+        try {
+          const parsedData = typeof response.body === 'string' 
+            ? JSON.parse(response.body) 
+            : response.body;
+          return { data: parseCondolences(parsedData) };
+        } catch (e) {
+          console.error('Error parsing response body:', e);
+        }
+      }
+
+      // If response is the array itself
+      if (Array.isArray(response)) {
+        return { data: parseCondolences(response) };
+      }
     }
 
     console.error('Invalid response format:', response);
@@ -197,6 +209,21 @@ export const getCondolences = async (): Promise<{ data: Condolence[] }> => {
     console.error('Error in getCondolences:', error);
     return { data: [] };
   }
+};
+
+// Type guard function
+const isCondolence = (obj: any): obj is Condolence => {
+  return (
+    typeof obj === 'object' &&
+    obj !== null &&
+    typeof obj.id === 'string' &&
+    typeof obj.userId === 'string' &&
+    typeof obj.userName === 'string' &&
+    typeof obj.text === 'string' &&
+    typeof obj.relation === 'string' &&
+    typeof obj.createdAt === 'string' &&
+    new Date(obj.createdAt).toString() !== 'Invalid Date'
+  );
 };
 
 export const addCondolence = async (condolence: Omit<Condolence, 'id'>): Promise<{ data: Condolence }> => {
@@ -209,36 +236,37 @@ export const addCondolence = async (condolence: Omit<Condolence, 'id'>): Promise
           'Content-Type': 'application/json',
           'Accept': 'application/json'
         },
-        body: {
-          userId: condolence.userId,
-          userName: condolence.userName,
-          text: condolence.text,
-          createdAt: condolence.createdAt
+        body: condolence
+      }
+    });
+
+    // Handle different response formats
+    if (response && typeof response === 'object') {
+      // If response is already parsed
+      if ('data' in response && isCondolence(response.data)) {
+        return { data: response.data };
+      }
+
+      // If response has a body
+      if ('body' in response) {
+        const body = response.body;
+        try {
+          const parsedData = typeof body === 'string' ? JSON.parse(body) : body;
+          if (isCondolence(parsedData)) {
+            return { data: parsedData };
+          }
+        } catch (e) {
+          console.error('Error parsing response body:', e);
         }
       }
-    }) as any;
 
-    // Handle AWS API Gateway response
-    if (response?.data) {
-      return { data: response.data };
-    }
-
-    if (response?.body) {
-      // If body is a ReadableStream
-      if (typeof response.body.json === 'function') {
-        const jsonData = await response.body.json();
-        return { data: jsonData };
+      // If response itself is the condolence
+      if (isCondolence(response)) {
+        return { data: response };
       }
-      // If body is already parsed
-      return { data: response.body };
     }
 
-    // Handle direct response
-    if (response && typeof response === 'object') {
-      return { data: response };
-    }
-
-    throw new Error('Invalid response format');
+    throw new Error('Invalid response format or missing required fields');
   } catch (error) {
     console.error('Error in addCondolence:', error);
     throw error;
