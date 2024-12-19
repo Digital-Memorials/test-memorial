@@ -273,10 +273,19 @@ const DeleteButton = styled.button`
   }
 `;
 
+const ErrorMessage = styled.div`
+  color: #E53E3E;
+  font-size: 0.875rem;
+  margin-top: 1rem;
+  text-align: center;
+`;
+
 export const Condolences: React.FC = () => {
   const [condolences, setCondolences] = useState<any[]>([]);
   const [relation, setRelation] = useState('');
   const [message, setMessage] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
   const { user } = useAuth();
 
   useEffect(() => {
@@ -287,14 +296,19 @@ export const Condolences: React.FC = () => {
     try {
       const response = await getCondolences();
       setCondolences(response.data);
+      setError('');
     } catch (error) {
       console.error('Error loading condolences:', error);
+      setError('Failed to load condolences. Please try again later.');
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
+
+    setIsLoading(true);
+    setError('');
 
     try {
       await addCondolence({
@@ -305,9 +319,12 @@ export const Condolences: React.FC = () => {
       });
       setRelation('');
       setMessage('');
-      loadCondolences();
+      await loadCondolences();
     } catch (error) {
       console.error('Error adding condolence:', error);
+      setError('Failed to add condolence. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -335,6 +352,7 @@ export const Condolences: React.FC = () => {
 
         {user && (
           <Form onSubmit={handleSubmit}>
+            {error && <ErrorMessage>{error}</ErrorMessage>}
             <FormGroup>
               <Label htmlFor="relationship">Relationship</Label>
               <Input
@@ -343,6 +361,7 @@ export const Condolences: React.FC = () => {
                 placeholder="Friend, Family, Colleague..."
                 value={relation}
                 onChange={(e) => setRelation(e.target.value)}
+                disabled={isLoading}
                 required
               />
             </FormGroup>
@@ -353,14 +372,17 @@ export const Condolences: React.FC = () => {
                 placeholder="Share your condolences, memories, or words of comfort..."
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
+                disabled={isLoading}
                 required
               />
             </FormGroup>
-            <Button type="submit">
-              Sign the Book
-              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-              </svg>
+            <Button type="submit" disabled={isLoading}>
+              {isLoading ? 'Signing...' : 'Sign the Book'}
+              {!isLoading && (
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                </svg>
+              )}
             </Button>
           </Form>
         )}

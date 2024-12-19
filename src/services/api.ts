@@ -170,18 +170,24 @@ export const getCondolences = async (): Promise<{ data: Condolence[] }> => {
   try {
     const response = await get({ apiName: 'memorialAPI', path: '/api/condolences' }) as any;
     
-    // Handle ReadableStream response
-    if (response?.body && typeof response.body.json === 'function') {
-      const jsonData = await response.body.json();
-      return { data: Array.isArray(jsonData) ? jsonData : [] };
-    }
-    
-    // Handle direct JSON response
+    // Handle AWS API Gateway response
     if (response?.body) {
-      return { data: Array.isArray(response.body) ? response.body : [] };
+      try {
+        // If body is a ReadableStream
+        if (typeof response.body.json === 'function') {
+          const jsonData = await response.body.json();
+          return { data: Array.isArray(jsonData) ? jsonData : [] };
+        }
+        // If body is already parsed
+        if (typeof response.body === 'object') {
+          return { data: Array.isArray(response.body) ? response.body : [] };
+        }
+      } catch (parseError) {
+        console.error('Error parsing response:', parseError);
+      }
     }
 
-    // Handle raw response
+    // Handle direct response
     if (Array.isArray(response)) {
       return { data: response };
     }
@@ -203,23 +209,29 @@ export const addCondolence = async (condolence: Omit<Condolence, 'id'>): Promise
         headers: {
           'Content-Type': 'application/json'
         },
-        body: condolence
+        body: JSON.stringify(condolence)
       }
     }) as any;
 
-    // Handle ReadableStream response
-    if (response?.body && typeof response.body.json === 'function') {
-      const jsonData = await response.body.json();
-      return { data: jsonData };
-    }
-
-    // Handle direct JSON response
+    // Handle AWS API Gateway response
     if (response?.body) {
-      return { data: response.body };
+      try {
+        // If body is a ReadableStream
+        if (typeof response.body.json === 'function') {
+          const jsonData = await response.body.json();
+          return { data: jsonData };
+        }
+        // If body is already parsed
+        if (typeof response.body === 'object') {
+          return { data: response.body };
+        }
+      } catch (parseError) {
+        console.error('Error parsing response:', parseError);
+      }
     }
 
-    // Handle raw response
-    if (response && typeof response === 'object') {
+    // Handle direct response
+    if (response && typeof response === 'object' && !response.body) {
       return { data: response };
     }
 
