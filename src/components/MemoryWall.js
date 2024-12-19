@@ -1,23 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { getUrl } from '@aws-amplify/storage';
 import { getMemories, addMemory, deleteMemory } from '../services/api';
 import { RequireAuth } from './auth/RequireAuth';
 import { useAuth } from '../contexts/AuthContext';
-import image1 from '../images/image1.jpg';
-import image2 from '../images/image2.jpg';
-import image3 from '../images/image3.jpg';
-import image4 from '../images/image4.jpg';
-import image5 from '../images/image5.jpg';
-import image6 from '../images/image6.jpg';
-
-// Image mapping object
-const imageMap = {
-  'image1.jpg': image1,
-  'image2.jpg': image2,
-  'image3.jpg': image3,
-  'image4.jpg': image4,
-  'image5.jpg': image5,
-  'image6.jpg': image6,
-};
 
 function MemoryWall() {
   const { user } = useAuth();
@@ -32,13 +17,13 @@ function MemoryWall() {
   });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   useEffect(() => {
     fetchMemories();
   }, []);
 
   useEffect(() => {
-    // Update newMemory's userId when user changes
     setNewMemory(prev => ({
       ...prev,
       userId: user?.id || 'guest',
@@ -49,7 +34,24 @@ function MemoryWall() {
   const fetchMemories = async () => {
     try {
       const response = await getMemories();
-      setMemories(response.data);
+      // Get signed URLs for all media
+      const memoriesWithUrls = await Promise.all(
+        response.data.map(async (memory) => {
+          if (memory.mediaType === 'image' && memory.mediaUrl) {
+            try {
+              const signedUrl = await Storage.get(memory.mediaUrl, { 
+                expires: 3600 // URL expires in 1 hour
+              });
+              return { ...memory, mediaUrl: signedUrl };
+            } catch (err) {
+              console.error('Failed to get signed URL:', err);
+              return memory;
+            }
+          }
+          return memory;
+        })
+      );
+      setMemories(memoriesWithUrls);
       setIsLoading(false);
     } catch (err) {
       setError('Failed to load memories');
@@ -57,10 +59,28 @@ function MemoryWall() {
     }
   };
 
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    try {
+      // Update form state
+      setNewMemory(prev => ({
+        ...prev,
+        mediaType: file.type.startsWith('image/') ? 'image' : 'video',
+        mediaUrl: URL.createObjectURL(file)
+      }));
+    } catch (err) {
+      setError('Failed to process file');
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError(null);
+    setUploadProgress(0);
+
     try {
-      // Ensure the memory is associated with the current user
       const memoryToAdd = {
         ...newMemory,
         userId: user?.id || 'guest',
@@ -68,7 +88,15 @@ function MemoryWall() {
       };
       
       const response = await addMemory(memoryToAdd);
-      setMemories([response.data, ...memories]);
+      
+      // Get the signed URL for the newly added memory if it has media
+      let newMemoryWithUrl = response.data;
+      if (newMemoryWithUrl.mediaType === 'image' && newMemoryWithUrl.mediaUrl) {
+        const signedUrl = await Storage.get(newMemoryWithUrl.mediaUrl);
+        newMemoryWithUrl = { ...newMemoryWithUrl, mediaUrl: signedUrl };
+      }
+
+      setMemories([newMemoryWithUrl, ...memories]);
       setNewMemory({
         name: user?.name || '',
         message: '',
@@ -77,13 +105,13 @@ function MemoryWall() {
         userId: user?.id || 'guest'
       });
       setShowForm(false);
+      setUploadProgress(0);
     } catch (err) {
       setError('Failed to add memory');
     }
   };
 
   const handleDelete = async (id, memoryUserId) => {
-    // Check if the current user is the owner of the memory
     if (user?.id !== memoryUserId) {
       setError('You can only delete your own memories');
       return;
@@ -101,23 +129,34 @@ function MemoryWall() {
     if (!memory.mediaUrl || memory.mediaType === 'none') return null;
 
     if (memory.mediaType === 'image') {
-      const imageSource = imageMap[memory.mediaUrl] || memory.mediaUrl;
       return (
-        <img
-          src={imageSource}
-          alt="Memory"
-          className="w-full h-56 object-cover rounded-lg mb-6"
-        />
+        <div className="relative">
+          <img
+            src={memory.mediaUrl}
+            alt="Memory"
+            className="w-full h-56 object-cover rounded-lg mb-6"
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src = 'placeholder-image.jpg'; // Add a placeholder image
+            }}
+          />
+        </div>
       );
     }
 
     if (memory.mediaType === 'video') {
       return (
-        <video
-          src={memory.mediaUrl}
-          controls
-          className="w-full h-56 object-cover rounded-lg mb-6"
-        />
+        <div className="relative">
+          <video
+            src={memory.mediaUrl}
+            controls
+            className="w-full h-56 object-cover rounded-lg mb-6"
+            onError={(e) => {
+              e.target.onerror = null;
+              // Handle video error
+            }}
+          />
+        </div>
       );
     }
   };
@@ -141,37 +180,27 @@ function MemoryWall() {
       )}
       
       <div>
-        <label htmlFor="mediaType" className="block font-display text-lg text-charcoal-800 mb-2">
+        <label htmlFor="media" className="block font-display text-lg text-charcoal-800 mb-2">
           Add Media (Optional)
         </label>
-        <select
-          id="mediaType"
-          value={newMemory.mediaType}
-          onChange={(e) => setNewMemory({ ...newMemory, mediaType: e.target.value })}
+        <input
+          type="file"
+          id="media"
+          accept="image/*,video/*"
+          onChange={handleFileChange}
           className="w-full px-4 py-3 rounded-lg border border-sepia-200 focus:border-sepia-400 focus:ring focus:ring-sepia-200 focus:ring-opacity-50 bg-cream-50/50 backdrop-blur-sm transition-colors duration-200"
-        >
-          <option value="none">No Media</option>
-          <option value="image">Image</option>
-          <option value="video">Video</option>
-        </select>
+        />
+        {uploadProgress > 0 && uploadProgress < 100 && (
+          <div className="mt-2">
+            <div className="h-2 bg-sepia-100 rounded-full">
+              <div 
+                className="h-full bg-sepia-500 rounded-full transition-all duration-300"
+                style={{ width: `${uploadProgress}%` }}
+              ></div>
+            </div>
+          </div>
+        )}
       </div>
-
-      {newMemory.mediaType !== 'none' && (
-        <div>
-          <label htmlFor="mediaUrl" className="block font-display text-lg text-charcoal-800 mb-2">
-            Media URL
-          </label>
-          <input
-            type="url"
-            id="mediaUrl"
-            value={newMemory.mediaUrl}
-            onChange={(e) => setNewMemory({ ...newMemory, mediaUrl: e.target.value })}
-            className="w-full px-4 py-3 rounded-lg border border-sepia-200 focus:border-sepia-400 focus:ring focus:ring-sepia-200 focus:ring-opacity-50 bg-cream-50/50 backdrop-blur-sm transition-colors duration-200"
-            placeholder="Enter URL for your image or video"
-            required
-          />
-        </div>
-      )}
       
       <div>
         <label htmlFor="message" className="block font-display text-lg text-charcoal-800 mb-2">
@@ -190,7 +219,8 @@ function MemoryWall() {
       <div className="text-center pt-4">
         <button
           type="submit"
-          className="inline-flex items-center space-x-2 px-8 py-3 bg-sepia-600 text-cream-50 rounded-full hover:bg-sepia-700 transition-colors duration-300"
+          disabled={uploadProgress > 0 && uploadProgress < 100}
+          className="inline-flex items-center space-x-2 px-8 py-3 bg-sepia-600 text-cream-50 rounded-full hover:bg-sepia-700 transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <span>Post Memory</span>
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -229,6 +259,12 @@ function MemoryWall() {
         </div>
       </div>
 
+      {error && (
+        <div className="mb-8 text-center">
+          <p className="text-red-500 font-serif italic">{error}</p>
+        </div>
+      )}
+
       {/* Memory Wall Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
         {memories.map((memory, index) => (
@@ -251,7 +287,7 @@ function MemoryWall() {
                 {renderMedia(memory)}
               </div>
 
-              {/* Main content - now always at bottom */}
+              {/* Main content */}
               <div className="mt-auto">
                 <div className="prose prose-sepia">
                   <blockquote className="text-charcoal-600 italic mb-4">"{memory.message}"</blockquote>

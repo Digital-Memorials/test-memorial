@@ -14,13 +14,13 @@ function Condolences() {
   });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     fetchCondolences();
   }, []);
 
   useEffect(() => {
-    // Update newCondolence's userId and name when user changes
     setNewCondolence(prev => ({
       ...prev,
       userId: user?.id || 'guest',
@@ -41,8 +41,10 @@ function Condolences() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError(null);
+    setIsSubmitting(true);
+
     try {
-      // Ensure the condolence is associated with the current user
       const condolenceToAdd = {
         ...newCondolence,
         userId: user?.id || 'guest',
@@ -59,11 +61,12 @@ function Condolences() {
       });
     } catch (err) {
       setError('Failed to add condolence');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleDelete = async (id, condolenceUserId) => {
-    // Check if the current user is the owner of the condolence
     if (user?.id !== condolenceUserId) {
       setError('You can only delete your own condolences');
       return;
@@ -129,12 +132,21 @@ function Condolences() {
       <div className="text-center pt-4">
         <button
           type="submit"
-          className="inline-flex items-center space-x-2 px-8 py-3 bg-sepia-600 text-cream-50 rounded-full hover:bg-sepia-700 transition-colors duration-300"
+          disabled={isSubmitting}
+          className="inline-flex items-center space-x-2 px-8 py-3 bg-sepia-600 text-cream-50 rounded-full hover:bg-sepia-700 transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <span>Sign the Book</span>
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-          </svg>
+          {!isSubmitting && (
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+            </svg>
+          )}
+          {isSubmitting && (
+            <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+            </svg>
+          )}
         </button>
       </div>
     </form>
@@ -196,7 +208,7 @@ function Condolences() {
           </header>
 
           {/* Form Section */}
-          <div className="mt-16 mb-12">
+          <div className="mt-16 mb-24">
             <RequireAuth>
               {renderForm()}
             </RequireAuth>

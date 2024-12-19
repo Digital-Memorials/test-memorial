@@ -1,0 +1,14 @@
+{
+  "resourceName": "memorialmedia",
+  "policyUUID": "20ac50f8",
+  "bucketName": "digital-memorial-media",
+  "storageAccess": "auth",
+  "guestAccess": [],
+  "authAccess": [
+    "CREATE_AND_UPDATE",
+    "READ",
+    "DELETE"
+  ],
+  "triggerFunction": "NONE",
+  "groupAccess": {}
+}
