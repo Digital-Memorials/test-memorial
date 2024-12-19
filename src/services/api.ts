@@ -22,8 +22,8 @@ export interface Condolence {
 // Memories API
 export const getMemories = async (): Promise<{ data: Memory[] }> => {
   try {
-    const response = await get({ apiName: 'memorialAPI', path: '/api/memories' });
-    const memories = response as unknown as Memory[];
+    const response = await get({ apiName: 'memorialAPI', path: '/api/memories' }) as unknown as { body: Memory[] };
+    const memories = response?.body || [];
     
     // Get signed URLs for all media
     const memoriesWithUrls = await Promise.all(
@@ -48,6 +48,7 @@ export const getMemories = async (): Promise<{ data: Memory[] }> => {
     
     return { data: memoriesWithUrls };
   } catch (error) {
+    console.error('Error in getMemories:', error);
     throw new Error('Failed to fetch memories');
   }
 };
@@ -74,9 +75,12 @@ export const addMemory = async (memory: Omit<Memory, 'id'>): Promise<{ data: Mem
       options: {
         body: memory
       }
-    });
+    }) as unknown as { body: Memory };
     
-    const newMemory = response as unknown as Memory;
+    const newMemory = response?.body;
+    if (!newMemory || typeof newMemory !== 'object') {
+      throw new Error('Invalid response format');
+    }
     
     // Get signed URL for the newly added memory
     if (newMemory.mediaType === 'image' && newMemory.mediaUrl) {
@@ -117,9 +121,9 @@ export const deleteMemory = async (id: string): Promise<void> => {
 // Condolences API
 export const getCondolences = async (): Promise<{ data: Condolence[] }> => {
   try {
-    const response = await get({ apiName: 'memorialAPI', path: '/api/condolences' });
+    const response = await get({ apiName: 'memorialAPI', path: '/api/condolences' }) as unknown as { body: Condolence[] };
     // Ensure we're handling the response correctly
-    const condolences = response?.Items || response || [];
+    const condolences = response?.body || [];
     return { data: Array.isArray(condolences) ? condolences : [] };
   } catch (error) {
     console.error('Error in getCondolences:', error);
@@ -135,13 +139,14 @@ export const addCondolence = async (condolence: Omit<Condolence, 'id'>): Promise
       options: {
         body: condolence
       }
-    });
+    }) as unknown as { body: Condolence };
+    
     // Handle the response more safely
-    const newCondolence = response?.Item || response;
+    const newCondolence = response?.body;
     if (!newCondolence || typeof newCondolence !== 'object') {
       throw new Error('Invalid response format');
     }
-    return { data: newCondolence as Condolence };
+    return { data: newCondolence };
   } catch (error) {
     console.error('Error in addCondolence:', error);
     throw new Error('Failed to add condolence');
