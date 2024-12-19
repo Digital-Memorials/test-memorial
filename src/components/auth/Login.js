@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { loginUser } from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
 
 function Login() {
@@ -19,8 +18,7 @@ function Login() {
     setIsLoading(true);
 
     try {
-      const response = await loginUser(formData);
-      login(response.data);
+      await login(formData.email, formData.password);
       navigate('/');
     } catch (err) {
       setError(err.message);
