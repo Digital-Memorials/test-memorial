@@ -4,7 +4,7 @@ import Obituary from './Obituary';
 import Gallery from './Gallery';
 import Timeline from './Timeline';
 import MemoryWall from './MemoryWall';
-import Condolences from './Condolences';
+import { Condolences } from './Condolences';
 import Footer from './Footer';
 import JohnSmith from '../images/JohnSmith.jpg';
 
