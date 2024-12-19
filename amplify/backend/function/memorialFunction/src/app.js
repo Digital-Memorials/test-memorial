@@ -127,10 +127,10 @@ app.get('/api/condolences', async function(req, res) {
 
   try {
     const data = await ddbDocClient.send(new ScanCommand(params));
-    res.json(data.Items);
+    res.json({ success: true, data: data.Items });
   } catch (err) {
     res.statusCode = 500;
-    res.json({error: 'Could not load condolences: ' + err.message});
+    res.json({ success: false, error: 'Could not load condolences: ' + err.message });
   }
 });
 
@@ -145,10 +145,15 @@ app.get('/api/condolences/:id', async function(req, res) {
 
   try {
     const data = await ddbDocClient.send(new GetCommand(params));
-    res.json(data.Item);
+    if (!data.Item) {
+      res.statusCode = 404;
+      res.json({ success: false, error: 'Condolence not found' });
+      return;
+    }
+    res.json({ success: true, data: data.Item });
   } catch (err) {
     res.statusCode = 500;
-    res.json({error: 'Could not load condolence: ' + err.message});
+    res.json({ success: false, error: 'Could not load condolence: ' + err.message });
   }
 });
 
@@ -168,7 +173,7 @@ app.post('/api/condolences', async function(req, res) {
     res.json({ success: true, data: params.Item });
   } catch (err) {
     res.statusCode = 500;
-    res.json({error: 'Could not create condolence: ' + err.message});
+    res.json({ success: false, error: 'Could not create condolence: ' + err.message });
   }
 });
 
@@ -186,7 +191,7 @@ app.delete('/api/condolences/:id', async function(req, res) {
     res.json({ success: true });
   } catch (err) {
     res.statusCode = 500;
-    res.json({error: 'Could not delete condolence: ' + err.message});
+    res.json({ success: false, error: 'Could not delete condolence: ' + err.message });
   }
 });
 

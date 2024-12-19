@@ -287,6 +287,8 @@ const Condolences: React.FC = () => {
   const [condolences, setCondolences] = useState<Condolence[]>([]);
   const [newCondolence, setNewCondolence] = useState('');
   const [relation, setRelation] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
 
   useEffect(() => {
@@ -295,12 +297,17 @@ const Condolences: React.FC = () => {
 
   const loadCondolences = async () => {
     try {
+      setIsLoading(true);
+      setError(null);
       const response = await getCondolences();
       if (response?.data) {
         setCondolences(response.data);
       }
     } catch (error) {
       console.error('Error loading condolences:', error);
+      setError('Failed to load condolences. Please try again later.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -309,6 +316,8 @@ const Condolences: React.FC = () => {
     if (!user || !newCondolence.trim() || !relation.trim()) return;
 
     try {
+      setIsLoading(true);
+      setError(null);
       const condolenceData = {
         text: newCondolence.trim(),
         userId: user.id,
@@ -325,6 +334,9 @@ const Condolences: React.FC = () => {
       }
     } catch (error) {
       console.error('Error adding condolence:', error);
+      setError('Failed to add condolence. Please try again later.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -340,6 +352,12 @@ const Condolences: React.FC = () => {
           </Subtitle>
         </Header>
 
+        {error && (
+          <div style={{ color: '#E53E3E', textAlign: 'center', marginBottom: '1rem' }}>
+            {error}
+          </div>
+        )}
+
         {user && (
           <Form onSubmit={handleSubmit}>
             <Input
@@ -348,15 +366,17 @@ const Condolences: React.FC = () => {
               onChange={(e) => setRelation(e.target.value)}
               placeholder="Your relationship to John (e.g., Friend, Colleague, Family)"
               required
+              disabled={isLoading}
             />
             <TextArea
               value={newCondolence}
               onChange={(e) => setNewCondolence(e.target.value)}
               placeholder="Share your condolences, memories, or words of comfort..."
               required
+              disabled={isLoading}
             />
-            <Button type="submit">
-              Sign the Book
+            <Button type="submit" disabled={isLoading}>
+              {isLoading ? 'Signing...' : 'Sign the Book'}
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
               </svg>
@@ -364,17 +384,21 @@ const Condolences: React.FC = () => {
           </Form>
         )}
 
-        <CondolenceList>
-          {condolences.map((condolence, index) => (
-            <CondolenceEntry key={condolence.id || index}>
-              <Message>{condolence.text}</Message>
-              <Author>
-                - {condolence.userName}
-                <Relation>• {condolence.relation}</Relation>
-              </Author>
-            </CondolenceEntry>
-          ))}
-        </CondolenceList>
+        {isLoading && !condolences.length ? (
+          <div style={{ textAlign: 'center', padding: '2rem' }}>Loading condolences...</div>
+        ) : (
+          <CondolenceList>
+            {condolences.map((condolence, index) => (
+              <CondolenceEntry key={condolence.id || index}>
+                <Message>{condolence.text}</Message>
+                <Author>
+                  - {condolence.userName}
+                  <Relation>• {condolence.relation}</Relation>
+                </Author>
+              </CondolenceEntry>
+            ))}
+          </CondolenceList>
+        )}
       </MainContent>
       <BookEdge />
     </BookContainer>

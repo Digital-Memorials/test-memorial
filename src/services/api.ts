@@ -12,6 +12,19 @@ export interface Memory {
   mediaUrl: string;
 }
 
+interface ApiResponse<T> {
+  body?: ReadableStream | T;
+  response?: Response;
+  statusCode?: number;
+  data?: T;
+  success?: boolean;
+}
+
+interface CondolenceResponse {
+  success: boolean;
+  data: Condolence;
+}
+
 // Memories API
 export const getMemories = async (): Promise<{ data: Memory[] }> => {
   try {
@@ -169,50 +182,16 @@ export const getCondolences = async (): Promise<{ data: Condolence[] }> => {
           'Accept': 'application/json'
         }
       }
-    });
+    }) as unknown as Response;
 
-    const parseCondolences = (data: any): Condolence[] => {
-      if (Array.isArray(data)) {
-        return data.filter(isCondolence);
-      }
-      return [];
-    };
+    const jsonData = await response.json();
+    console.log('Raw condolences response:', jsonData);
 
-    // Handle different response formats
-    if (response && typeof response === 'object') {
-      // If response has data property
-      if ('data' in response && Array.isArray(response.data)) {
-        return { data: parseCondolences(response.data) };
-      }
-
-      // If response has body
-      if ('body' in response) {
-        try {
-          const parsedData = typeof response.body === 'string' 
-            ? JSON.parse(response.body) 
-            : response.body;
-          
-          // If body has data property
-          if ('data' in parsedData && Array.isArray(parsedData.data)) {
-            return { data: parseCondolences(parsedData.data) };
-          }
-          
-          // If body is the array itself
-          if (Array.isArray(parsedData)) {
-            return { data: parseCondolences(parsedData) };
-          }
-        } catch (e) {
-          console.error('Error parsing response body:', e);
-        }
-      }
-
-      // If response is the array itself
-      if (Array.isArray(response)) {
-        return { data: parseCondolences(response) };
-      }
+    if (jsonData.success && Array.isArray(jsonData.data)) {
+      return { data: jsonData.data.filter(isCondolence) };
     }
 
-    console.error('Invalid response format:', response);
+    console.error('Invalid response format:', jsonData);
     return { data: [] };
   } catch (error) {
     console.error('Error in getCondolences:', error);
@@ -237,6 +216,7 @@ const isCondolence = (obj: any): obj is Condolence => {
 
 export const addCondolence = async (condolence: Omit<Condolence, 'id'>): Promise<{ data: Condolence }> => {
   try {
+    console.log('Sending condolence data:', condolence);
     const response = await post({
       apiName: 'memorialAPI',
       path: '/api/condolences',
@@ -247,32 +227,17 @@ export const addCondolence = async (condolence: Omit<Condolence, 'id'>): Promise
         },
         body: condolence
       }
-    });
+    }) as unknown as Response;
 
-    // Handle different response formats
-    if (response && typeof response === 'object') {
-      // If response has success and data properties
-      if ('success' in response && 'data' in response && isCondolence(response.data)) {
-        return { data: response.data };
-      }
+    console.log('Raw response:', response);
 
-      // If response has a body with success and data properties
-      if ('body' in response) {
-        const body = response.body;
-        try {
-          const parsedData = typeof body === 'string' ? JSON.parse(body) : body;
-          if (parsedData?.success && parsedData?.data && isCondolence(parsedData.data)) {
-            return { data: parsedData.data };
-          }
-        } catch (e) {
-          console.error('Error parsing response body:', e);
-        }
-      }
+    // Parse the response as JSON
+    const jsonData = await response.json() as CondolenceResponse;
+    console.log('Parsed JSON data:', jsonData);
 
-      // If response itself is the condolence
-      if (isCondolence(response)) {
-        return { data: response };
-      }
+    if (jsonData.success && isCondolence(jsonData.data)) {
+      console.log('Valid condolence');
+      return { data: jsonData.data };
     }
 
     throw new Error('Invalid response format or missing required fields');
