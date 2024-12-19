@@ -1,7 +1,13 @@
 import React from 'react';
 
-function Timeline() {
-  const events = [
+interface TimelineEvent {
+  year: string;
+  title: string;
+  description: string;
+}
+
+const Timeline: React.FC = () => {
+  const events: TimelineEvent[] = [
     {
       year: '1950',
       title: 'Born in Tramore',

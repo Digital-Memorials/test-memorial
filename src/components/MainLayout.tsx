@@ -8,11 +8,16 @@ import Condolences from './Condolences';
 import Footer from './Footer';
 import JohnSmith from '../images/JohnSmith.jpg';
 
-function MainLayout() {
-  const { user, logout } = useAuth();
-  const [activeTab, setActiveTab] = useState('obituary');
+type Tab = {
+  id: string;
+  label: string;
+};
 
-  const tabs = [
+const MainLayout: React.FC = () => {
+  const { user, logout } = useAuth();
+  const [activeTab, setActiveTab] = useState<string>('obituary');
+
+  const tabs: Tab[] = [
     { id: 'obituary', label: 'Life Story' },
     { id: 'gallery', label: 'Gallery' },
     { id: 'timeline', label: 'Timeline' },
@@ -51,7 +56,7 @@ function MainLayout() {
             <div className="absolute top-4 right-4 md:top-6 md:right-6 z-10">
               <div className="flex items-center gap-2 md:gap-3 px-3 py-1.5 md:px-4 md:py-2 bg-charcoal-900/80 backdrop-blur-sm rounded-lg border border-cream-200/10 shadow-elegant transform hover:scale-[1.02] transition-all duration-300">
                 <span className="text-xs md:text-sm text-cream-50/80 font-serif truncate max-w-[100px] md:max-w-none">
-                  {user.name}
+                  {user.email}
                 </span>
                 <div className="h-3 md:h-4 w-px bg-cream-200/20"></div>
                 <button

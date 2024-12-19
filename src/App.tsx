@@ -5,7 +5,7 @@ import Login from './components/auth/Login';
 import Register from './components/auth/Register';
 import MainLayout from './components/MainLayout';
 
-function App() {
+const App: React.FC = () => {
   return (
     <Router>
       <AuthProvider>
@@ -19,4 +19,4 @@ function App() {
   );
 }
 
-export default App;
+export default App; 

@@ -1,6 +1,6 @@
 import React from 'react';
 
-function Obituary() {
+const Obituary: React.FC = () => {
   return (
     <section className="max-w-prose mx-auto">
       {/* Section Header */}

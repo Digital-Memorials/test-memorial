@@ -1,6 +1,6 @@
 import React from 'react';
 
-function Header() {
+const Header: React.FC = () => {
   return (
     <header className="text-center py-16">
       <h1 className="font-display text-6xl text-cream-50 mb-4">John David Smith</h1>

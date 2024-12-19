@@ -1,12 +1,16 @@
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 
-export const RequireAuth = ({ children }) => {
-  const { isAuthenticated } = useAuth();
+interface RequireAuthProps {
+  children: ReactNode;
+}
+
+export const RequireAuth: React.FC<RequireAuthProps> = ({ children }) => {
+  const { user } = useAuth();
   const navigate = useNavigate();
 
-  if (!isAuthenticated) {
+  if (!user) {
     return (
       <div className="text-center py-8">
         <p className="text-charcoal-600 mb-4">Please sign in to share your message</p>
@@ -23,5 +27,5 @@ export const RequireAuth = ({ children }) => {
     );
   }
 
-  return children;
+  return <>{children}</>;
 }; 

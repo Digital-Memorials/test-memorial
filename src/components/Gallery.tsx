@@ -6,9 +6,14 @@ import image4 from '../images/image4.jpg';
 import image5 from '../images/image5.jpg';
 import image6 from '../images/image6.jpg';
 
-function Gallery() {
-  // Gallery images with actual image imports
-  const images = [
+interface GalleryImage {
+  url: string;
+  caption: string;
+  year: string;
+}
+
+const Gallery: React.FC = () => {
+  const images: GalleryImage[] = [
     {
       url: image1,
       caption: 'Family vacation in Italy, Summer 1985',

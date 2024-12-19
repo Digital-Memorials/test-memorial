@@ -1,6 +1,6 @@
 import React from 'react';
 
-function Overview() {
+const Overview: React.FC = () => {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-center">
