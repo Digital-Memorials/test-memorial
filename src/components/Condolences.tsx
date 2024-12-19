@@ -36,7 +36,7 @@ const BookEdge = styled.div`
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(to right, rgba(0, 0, 0, 0.03), transparent 50%);
+    background: linear-gradient(to right, rgba(0, 0, 0, 0.05), transparent 70%);
   }
 
   /* Vertical lines for pages */
@@ -47,24 +47,24 @@ const BookEdge = styled.div`
     background-image: repeating-linear-gradient(
       to right,
       transparent,
-      transparent 2px,
-      rgba(0, 0, 0, 0.03) 2px,
-      rgba(0, 0, 0, 0.03) 3px
+      transparent 1px,
+      rgba(0, 0, 0, 0.05) 1px,
+      rgba(0, 0, 0, 0.05) 2px
     );
-    background-size: 4px 100%;
+    background-size: 3px 100%;
   }
 
   /* Multiple horizontal lines */
-  ${[...Array(24)].map((_, i) => `
+  ${[...Array(30)].map((_, i) => `
     &::before {
       content: '';
       position: absolute;
-      top: ${(i + 1) * 4}%;
+      top: ${(i + 1) * 3.33}%;
       left: 0;
       right: 0;
       height: 1px;
-      background: rgba(0, 0, 0, ${0.02 + (i % 2) * 0.01});
-      transform: translateX(${i * 0.2}px) rotate(${0.1}deg);
+      background: rgba(0, 0, 0, ${0.03 + (i % 2) * 0.02});
+      transform: translateX(${i * 0.15}px) rotate(${0.05}deg);
     }
   `)}
 `;
@@ -113,14 +113,14 @@ const Form = styled.form`
 const FormGroup = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
 `;
 
 const Label = styled.label`
   font-family: 'Lora', serif;
   font-size: 0.875rem;
-  color: #666;
-  margin-bottom: 0.25rem;
+  color: #4A5568;
   font-weight: normal;
 `;
 
@@ -140,7 +140,7 @@ const Input = styled.input`
   &:focus {
     outline: none;
     border-color: #CBD5E0;
-    box-shadow: 0 0 0 3px rgba(203, 213, 224, 0.2);
+    box-shadow: 0 0 0 2px rgba(203, 213, 224, 0.15);
   }
 `;
 
@@ -162,7 +162,7 @@ const TextArea = styled.textarea`
   &:focus {
     outline: none;
     border-color: #CBD5E0;
-    box-shadow: 0 0 0 3px rgba(203, 213, 224, 0.2);
+    box-shadow: 0 0 0 2px rgba(203, 213, 224, 0.15);
   }
 `;
 
@@ -205,7 +205,7 @@ const CondolenceList = styled.div`
 `;
 
 const CondolenceEntry = styled.article`
-  padding: 2rem 0;
+  padding: 1.5rem 0;
   border-bottom: 1px solid rgba(203, 213, 224, 0.3);
   
   &:last-child {
@@ -251,6 +251,25 @@ const Relation = styled.span`
     content: '•';
     margin: 0 0.5rem;
     color: #CBD5E0;
+  }
+`;
+
+const DeleteButton = styled.button`
+  background: none;
+  border: none;
+  padding: 0.5rem;
+  color: #CBD5E0;
+  cursor: pointer;
+  transition: color 0.2s;
+  margin-top: 0.5rem;
+  
+  &:hover {
+    color: #E53E3E;
+  }
+  
+  svg {
+    width: 1rem;
+    height: 1rem;
   }
 `;
 
@@ -317,8 +336,9 @@ export const Condolences: React.FC = () => {
         {user && (
           <Form onSubmit={handleSubmit}>
             <FormGroup>
-              <Label>Relationship</Label>
+              <Label htmlFor="relationship">Relationship</Label>
               <Input
+                id="relationship"
                 type="text"
                 placeholder="Friend, Family, Colleague..."
                 value={relation}
@@ -327,8 +347,9 @@ export const Condolences: React.FC = () => {
               />
             </FormGroup>
             <FormGroup>
-              <Label>Your Message</Label>
+              <Label htmlFor="message">Your Message</Label>
               <TextArea
+                id="message"
                 placeholder="Share your condolences, memories, or words of comfort..."
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
