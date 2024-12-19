@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getCondolences, addCondolence, deleteCondolence, Condolence } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 interface CondolenceFormData {
   name: string;
@@ -18,6 +19,7 @@ function Condolences() {
   const [error, setError] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchCondolences();
@@ -46,6 +48,7 @@ function Condolences() {
 
       const condolenceData = {
         ...formData,
+        name: user.name,
         userId: user.id,
       };
 
@@ -73,43 +76,43 @@ function Condolences() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h2 className="text-2xl font-bold mb-4">Condolences</h2>
-      {error && <div className="text-red-500 mb-4">{error}</div>}
-      
-      {user && (
-        <form onSubmit={handleSubmit} className="mb-8">
-          <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2">
-              Name
-              <input
-                type="text"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                required
-              />
-            </label>
-          </div>
-          <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2">
-              Relation
+    <div className="max-w-2xl mx-auto bg-white rounded-lg shadow-lg p-8">
+      <h2 className="text-3xl font-display text-center mb-4">Book of Condolences</h2>
+      <p className="text-center text-gray-600 mb-8">
+        Share your condolences, memories, and messages of support for the family in this
+        digital book of remembrance.
+      </p>
+
+      {error && (
+        <div className="mb-4 p-4 bg-red-100 text-red-700 rounded">
+          {error}
+        </div>
+      )}
+
+      {user ? (
+        <form onSubmit={handleSubmit} className="space-y-6 mb-12">
+          <div>
+            <label className="block text-gray-700 mb-2">
+              Relationship
               <input
                 type="text"
                 value={formData.relation}
                 onChange={(e) => setFormData({ ...formData, relation: e.target.value })}
-                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                className="w-full p-2 border border-gray-300 rounded mt-1"
+                placeholder="Friend, Family, Colleague..."
                 required
               />
             </label>
           </div>
-          <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2">
-              Message
+          <div>
+            <label className="block text-gray-700 mb-2">
+              Your Message
               <textarea
                 value={formData.message}
                 onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                className="w-full p-2 border border-gray-300 rounded mt-1"
+                rows={6}
+                placeholder="Share your condolences, memories, or words of comfort..."
                 required
               />
             </label>
@@ -117,27 +120,59 @@ function Condolences() {
           <button
             type="submit"
             disabled={isLoading}
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+            className="w-full bg-[#8B6B4D] text-white py-3 px-6 rounded hover:bg-[#75593F] transition-colors flex items-center justify-center"
           >
-            {isLoading ? 'Adding...' : 'Add Condolence'}
+            {isLoading ? (
+              <div className="flex items-center space-x-2">
+                <div className="w-2 h-2 bg-white rounded-full animate-bounce" />
+                <div className="w-2 h-2 bg-white rounded-full animate-bounce [animation-delay:0.2s]" />
+                <div className="w-2 h-2 bg-white rounded-full animate-bounce [animation-delay:0.4s]" />
+              </div>
+            ) : (
+              <span className="flex items-center">
+                Sign the Book
+                <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                </svg>
+              </span>
+            )}
           </button>
         </form>
+      ) : (
+        <div className="text-center mb-12">
+          <button
+            onClick={() => navigate('/login')}
+            className="bg-[#8B6B4D] text-white py-3 px-6 rounded hover:bg-[#75593F] transition-colors inline-flex items-center"
+          >
+            Sign in to Share a Condolence
+            <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+            </svg>
+          </button>
+        </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="space-y-8">
         {condolences.map((condolence) => (
-          <div key={condolence.id} className="border p-4 rounded shadow">
-            <h3 className="font-bold">{condolence.name}</h3>
-            <p className="text-gray-600">{condolence.relation}</p>
-            <p className="mt-2">{condolence.message}</p>
-            {user && user.id === condolence.userId && (
-              <button
-                onClick={() => handleDelete(condolence.id)}
-                className="mt-2 text-red-500 hover:text-red-700"
-              >
-                Delete
-              </button>
-            )}
+          <div key={condolence.id} className="border-b border-gray-200 pb-6 last:border-b-0">
+            <div className="relative pl-8">
+              <div className="absolute left-0 top-0 text-[#8B6B4D] text-4xl font-serif">"</div>
+              <p className="text-gray-700 italic mb-4">{condolence.message}</p>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-semibold text-gray-900">{condolence.name}</p>
+                  <p className="text-sm text-gray-600">{condolence.relation}</p>
+                </div>
+                {user && user.id === condolence.userId && (
+                  <button
+                    onClick={() => handleDelete(condolence.id)}
+                    className="text-sm text-red-600 hover:text-red-700"
+                  >
+                    Delete
+                  </button>
+                )}
+              </div>
+            </div>
           </div>
         ))}
       </div>
