@@ -129,19 +129,27 @@ export const addMemory = async (memory: Omit<Memory, 'id'>): Promise<{ data: Mem
 
     // If there's media, upload to S3 first
     if (memory.mediaType !== 'none' && memory.mediaUrl) {
-      const file = await fetch(memory.mediaUrl).then(r => r.blob());
-      const filename = `memories/${Date.now()}-${memory.userId}`;
-      await uploadData({
-        key: filename,
-        data: file,
-        options: {
-          contentType: file.type
-        }
-      });
+      try {
+        const file = await fetch(memory.mediaUrl).then(r => r.blob());
+        const filename = `memories/${Date.now()}-${memory.userId}.${memory.mediaType === 'image' ? 'jpg' : 'mp4'}`;
+        
+        const uploadResult = await uploadData({
+          data: file,
+          key: filename
+        }).result;
 
-      // Get the signed URL for the uploaded file
-      const result = await getUrl({ key: filename });
-      memory.mediaUrl = result.url.toString();
+        if (uploadResult?.key) {
+          const urlResult = await getUrl({
+            key: uploadResult.key
+          });
+          memory.mediaUrl = urlResult.url.toString();
+        } else {
+          throw new Error('Upload failed - no key returned');
+        }
+      } catch (uploadError) {
+        console.error('Error uploading to S3:', uploadError);
+        throw new Error('Failed to upload media');
+      }
     }
 
     const response = await post({
