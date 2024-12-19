@@ -1,5 +1,6 @@
 import { get, post, del } from '@aws-amplify/api';
 import { uploadData, remove, getUrl } from '@aws-amplify/storage';
+import { Condolence } from '../types';
 
 // Types
 export interface Memory {
@@ -10,8 +11,6 @@ export interface Memory {
   mediaType: string;
   mediaUrl: string;
 }
-
-import { Condolence } from '../types';
 
 // Memories API
 export const getMemories = async (): Promise<{ data: Memory[] }> => {
