@@ -33,24 +33,7 @@ function MemoryWall() {
   const fetchMemories = async () => {
     try {
       const response = await getMemories();
-      // Get signed URLs for all media
-      const memoriesWithUrls = await Promise.all(
-        response.data.map(async (memory) => {
-          if (memory.mediaType === 'image' && memory.mediaUrl) {
-            try {
-              const signedUrl = await Storage.get(memory.mediaUrl, { 
-                expires: 3600 // URL expires in 1 hour
-              });
-              return { ...memory, mediaUrl: signedUrl };
-            } catch (err) {
-              console.error('Failed to get signed URL:', err);
-              return memory;
-            }
-          }
-          return memory;
-        })
-      );
-      setMemories(memoriesWithUrls);
+      setMemories(response.data);
       setIsLoading(false);
     } catch (err) {
       setError('Failed to load memories');
@@ -63,7 +46,6 @@ function MemoryWall() {
     if (!file) return;
 
     try {
-      // Update form state
       setNewMemory(prev => ({
         ...prev,
         mediaType: file.type.startsWith('image/') ? 'image' : 'video',
@@ -87,15 +69,7 @@ function MemoryWall() {
       };
       
       const response = await addMemory(memoryToAdd);
-      
-      // Get the signed URL for the newly added memory if it has media
-      let newMemoryWithUrl = response.data;
-      if (newMemoryWithUrl.mediaType === 'image' && newMemoryWithUrl.mediaUrl) {
-        const signedUrl = await Storage.get(newMemoryWithUrl.mediaUrl);
-        newMemoryWithUrl = { ...newMemoryWithUrl, mediaUrl: signedUrl };
-      }
-
-      setMemories([newMemoryWithUrl, ...memories]);
+      setMemories([response.data, ...memories]);
       setNewMemory({
         name: user?.name || '',
         message: '',
