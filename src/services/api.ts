@@ -12,12 +12,9 @@ export interface Memory {
   mediaUrl: string;
 }
 
-interface ApiResponse<T> {
-  body?: ReadableStream | T;
-  response?: Response;
-  statusCode?: number;
-  data?: T;
-  success?: boolean;
+interface AmplifyResponse {
+  response: Promise<{ body: string | object }>;
+  body?: string | object;
 }
 
 interface CondolenceResponse {
@@ -182,10 +179,33 @@ export const getCondolences = async (): Promise<{ data: Condolence[] }> => {
           'Accept': 'application/json'
         }
       }
-    }) as unknown as Response;
+    }) as AmplifyResponse;
 
-    const jsonData = await response.json();
-    console.log('Raw condolences response:', jsonData);
+    console.log('Raw condolences response:', response);
+
+    // Handle Amplify response format
+    let jsonData: { success: boolean; data: any[] };
+    
+    if (response?.response instanceof Promise) {
+      const resolvedResponse = await response.response;
+      console.log('Resolved response:', resolvedResponse);
+      if (resolvedResponse?.body) {
+        const body = typeof resolvedResponse.body === 'string' 
+          ? JSON.parse(resolvedResponse.body) 
+          : resolvedResponse.body;
+        jsonData = body;
+      } else {
+        throw new Error('No response body received');
+      }
+    } else if (response?.body) {
+      jsonData = typeof response.body === 'string' 
+        ? JSON.parse(response.body) 
+        : response.body;
+    } else {
+      throw new Error('Invalid response format');
+    }
+
+    console.log('Parsed condolences data:', jsonData);
 
     if (jsonData.success && Array.isArray(jsonData.data)) {
       return { data: jsonData.data.filter(isCondolence) };
@@ -227,13 +247,33 @@ export const addCondolence = async (condolence: Omit<Condolence, 'id'>): Promise
         },
         body: condolence
       }
-    }) as unknown as Response;
+    }) as AmplifyResponse;
 
     console.log('Raw response:', response);
 
-    // Parse the response as JSON
-    const jsonData = await response.json() as CondolenceResponse;
-    console.log('Parsed JSON data:', jsonData);
+    // Handle Amplify response format
+    let jsonData: CondolenceResponse;
+    
+    if (response?.response instanceof Promise) {
+      const resolvedResponse = await response.response;
+      console.log('Resolved response:', resolvedResponse);
+      if (resolvedResponse?.body) {
+        const body = typeof resolvedResponse.body === 'string' 
+          ? JSON.parse(resolvedResponse.body) 
+          : resolvedResponse.body;
+        jsonData = body;
+      } else {
+        throw new Error('No response body received');
+      }
+    } else if (response?.body) {
+      jsonData = typeof response.body === 'string' 
+        ? JSON.parse(response.body) 
+        : response.body;
+    } else {
+      throw new Error('Invalid response format');
+    }
+
+    console.log('Parsed response data:', jsonData);
 
     if (jsonData.success && isCondolence(jsonData.data)) {
       console.log('Valid condolence');
