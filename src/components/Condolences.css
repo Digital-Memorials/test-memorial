@@ -1,0 +1,92 @@
+.condolences-container {
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.condolences-container h2 {
+  text-align: center;
+  color: #2D3748;
+  margin-bottom: 2rem;
+  font-size: 2rem;
+  font-weight: 600;
+}
+
+.condolences-list {
+  margin-bottom: 2rem;
+}
+
+.condolence-item {
+  padding: 1.5rem;
+  border-bottom: 1px solid #E2E8F0;
+  transition: background-color 0.2s;
+}
+
+.condolence-item:last-child {
+  border-bottom: none;
+}
+
+.condolence-item:hover {
+  background-color: #F7FAFC;
+}
+
+.condolence-text {
+  color: #4A5568;
+  font-size: 1rem;
+  line-height: 1.6;
+  margin-bottom: 0.5rem;
+}
+
+.condolence-author {
+  color: #718096;
+  font-size: 0.875rem;
+  font-style: italic;
+}
+
+.condolence-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.condolence-input {
+  width: 100%;
+  min-height: 120px;
+  padding: 1rem;
+  border: 1px solid #E2E8F0;
+  border-radius: 4px;
+  resize: vertical;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #2D3748;
+}
+
+.condolence-input:focus {
+  outline: none;
+  border-color: #4A5568;
+  box-shadow: 0 0 0 2px rgba(74, 85, 104, 0.1);
+}
+
+.submit-button {
+  align-self: flex-end;
+  padding: 0.75rem 2rem;
+  background-color: #4A5568;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.submit-button:hover {
+  background-color: #2D3748;
+}
+
+.submit-button:disabled {
+  background-color: #CBD5E0;
+  cursor: not-allowed;
+} 

@@ -1,23 +1,15 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
-interface FormData {
-  name: string;
-  email: string;
-  password: string;
-}
-
-const Register: React.FC = () => {
-  const navigate = useNavigate();
+const Register = () => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const { register } = useAuth();
-  const [formData, setFormData] = useState<FormData>({
-    name: '',
-    email: '',
-    password: '',
-  });
-  const [error, setError] = useState<string>('');
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,140 +17,92 @@ const Register: React.FC = () => {
     setIsLoading(true);
 
     try {
-      await register(formData.email, formData.password, formData.name);
+      await register(email, password, name);
       navigate('/');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create account');
+      setError(err instanceof Error ? err.message : 'Failed to register');
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-warm from-cream-50 via-cream-100 to-sepia-50">
-      {/* Subtle texture overlay */}
-      <div className="fixed inset-0 bg-noise-pattern opacity-[0.015] pointer-events-none"></div>
-
-      <div className="max-w-md mx-auto px-4 py-24">
-        {/* Back to Memorial Link */}
-        <div className="mb-12 text-center">
-          <button
-            onClick={() => navigate('/')}
-            className="inline-flex items-center space-x-2 text-sepia-600 hover:text-sepia-700 transition-colors duration-300"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16l-4-4m0 0l4-4m-4 4h18" />
-            </svg>
-            <span className="font-serif">Back to Memorial</span>
-          </button>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-warm from-cream-50 via-cream-100 to-sepia-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-lg shadow-elegant">
+        <div>
+          <h2 className="mt-6 text-center text-3xl font-display text-charcoal-800">
+            Create an Account
+          </h2>
         </div>
-
-        {/* Header */}
-        <div className="mb-12 text-center">
-          <h2 className="font-display text-4xl text-charcoal-800 mb-4">Create Account</h2>
-          <p className="font-serif text-charcoal-600">Join us in preserving cherished memories</p>
-          <div className="mt-6 flex items-center justify-center space-x-6">
-            <div className="h-px w-16 bg-gradient-to-r from-transparent via-sepia-300/50 to-transparent"></div>
-            <div className="h-1.5 w-1.5 rounded-full bg-sepia-300/50"></div>
-            <div className="h-px w-16 bg-gradient-to-r from-transparent via-sepia-300/50 to-transparent"></div>
-          </div>
-        </div>
-
-        {/* Form Container */}
-        <div className="relative">
-          {/* Decorative Elements */}
-          <div className="absolute -inset-1 bg-gradient-to-r from-sepia-200/20 via-cream-200/20 to-sepia-200/20 rounded-xl blur"></div>
-          <div className="relative bg-cream-50/80 backdrop-blur-sm rounded-xl p-8 shadow-elegant">
-            {error && (
-              <div className="p-4 mb-6 text-red-800 bg-red-100/80 rounded-lg border border-red-200">
-                <div className="flex items-center space-x-2">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <span className="font-serif">{error}</span>
-                </div>
-              </div>
-            )}
-
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div>
-                <label htmlFor="name" className="block font-display text-lg text-charcoal-800 mb-2">
-                  Full Name
-                </label>
-                <input
-                  type="text"
-                  id="name"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-4 py-3 rounded-lg border border-sepia-200 focus:border-sepia-400 focus:ring focus:ring-sepia-200 focus:ring-opacity-50 bg-cream-50/50 backdrop-blur-sm transition-colors duration-200"
-                  required
-                />
-              </div>
-
-              <div>
-                <label htmlFor="email" className="block font-display text-lg text-charcoal-800 mb-2">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="w-full px-4 py-3 rounded-lg border border-sepia-200 focus:border-sepia-400 focus:ring focus:ring-sepia-200 focus:ring-opacity-50 bg-cream-50/50 backdrop-blur-sm transition-colors duration-200"
-                  required
-                />
-              </div>
-
-              <div>
-                <label htmlFor="password" className="block font-display text-lg text-charcoal-800 mb-2">
-                  Password
-                </label>
-                <input
-                  type="password"
-                  id="password"
-                  value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  className="w-full px-4 py-3 rounded-lg border border-sepia-200 focus:border-sepia-400 focus:ring focus:ring-sepia-200 focus:ring-opacity-50 bg-cream-50/50 backdrop-blur-sm transition-colors duration-200"
-                  required
-                />
-              </div>
-
-              <div className="pt-4">
-                <button
-                  type="submit"
-                  disabled={isLoading}
-                  className="w-full px-8 py-4 bg-sepia-600 text-cream-50 rounded-lg hover:bg-sepia-700 transition-all duration-300 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-                >
-                  {isLoading ? (
-                    <div className="inline-flex items-center space-x-2">
-                      <div className="w-2 h-2 bg-cream-50 rounded-full animate-bounce"></div>
-                      <div className="w-2 h-2 bg-cream-50 rounded-full animate-bounce [animation-delay:0.2s]"></div>
-                      <div className="w-2 h-2 bg-cream-50 rounded-full animate-bounce [animation-delay:0.4s]"></div>
-                    </div>
-                  ) : (
-                    <span className="font-display tracking-wide">Create Account</span>
-                  )}
-                </button>
-              </div>
-            </form>
-
-            <div className="mt-8 text-center">
-              <p className="text-charcoal-600 font-serif">
-                Already have an account?{' '}
-                <button
-                  type="button"
-                  onClick={() => navigate('/login')}
-                  className="text-sepia-600 hover:text-sepia-700 transition-colors duration-300 font-display"
-                >
-                  Sign in
-                </button>
-              </p>
+        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+          {error && (
+            <div className="text-red-600 text-center text-sm">
+              {error}
+            </div>
+          )}
+          <div className="rounded-md shadow-sm space-y-4">
+            <div>
+              <label htmlFor="name" className="sr-only">
+                Full Name
+              </label>
+              <input
+                id="name"
+                name="name"
+                type="text"
+                required
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="appearance-none rounded relative block w-full px-3 py-2 border border-sepia-300 placeholder-charcoal-400 text-charcoal-900 focus:outline-none focus:ring-sepia-500 focus:border-sepia-500 focus:z-10 sm:text-sm"
+                placeholder="Full Name"
+              />
+            </div>
+            <div>
+              <label htmlFor="email-address" className="sr-only">
+                Email address
+              </label>
+              <input
+                id="email-address"
+                name="email"
+                type="email"
+                autoComplete="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="appearance-none rounded relative block w-full px-3 py-2 border border-sepia-300 placeholder-charcoal-400 text-charcoal-900 focus:outline-none focus:ring-sepia-500 focus:border-sepia-500 focus:z-10 sm:text-sm"
+                placeholder="Email address"
+              />
+            </div>
+            <div>
+              <label htmlFor="password" className="sr-only">
+                Password
+              </label>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                autoComplete="new-password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="appearance-none rounded relative block w-full px-3 py-2 border border-sepia-300 placeholder-charcoal-400 text-charcoal-900 focus:outline-none focus:ring-sepia-500 focus:border-sepia-500 focus:z-10 sm:text-sm"
+                placeholder="Password"
+              />
             </div>
           </div>
-        </div>
+
+          <div>
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-sepia-600 hover:bg-sepia-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sepia-500"
+            >
+              {isLoading ? 'Creating Account...' : 'Sign up'}
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );
-}
+};
 
 export default Register; 

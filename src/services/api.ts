@@ -11,13 +11,7 @@ export interface Memory {
   mediaUrl: string;
 }
 
-export interface Condolence {
-  id: string;
-  userId: string;
-  name: string;
-  relation: string;
-  message: string;
-}
+import { Condolence } from '../types';
 
 // Memories API
 export const getMemories = async (): Promise<{ data: Memory[] }> => {
@@ -168,23 +162,29 @@ export const deleteMemory = async (id: string): Promise<void> => {
 // Condolences API
 export const getCondolences = async (): Promise<{ data: Condolence[] }> => {
   try {
-    const response = await get({ apiName: 'memorialAPI', path: '/api/condolences' }) as any;
+    const response = await get({
+      apiName: 'memorialAPI',
+      path: '/api/condolences',
+      options: {
+        headers: {
+          'Accept': 'application/json'
+        }
+      }
+    }) as any;
     
     // Handle AWS API Gateway response
+    if (response?.data) {
+      return { data: Array.isArray(response.data) ? response.data : [] };
+    }
+
     if (response?.body) {
-      try {
-        // If body is a ReadableStream
-        if (typeof response.body.json === 'function') {
-          const jsonData = await response.body.json();
-          return { data: Array.isArray(jsonData) ? jsonData : [] };
-        }
-        // If body is already parsed
-        if (typeof response.body === 'object') {
-          return { data: Array.isArray(response.body) ? response.body : [] };
-        }
-      } catch (parseError) {
-        console.error('Error parsing response:', parseError);
+      // If body is a ReadableStream
+      if (typeof response.body.json === 'function') {
+        const jsonData = await response.body.json();
+        return { data: Array.isArray(jsonData) ? jsonData : [] };
       }
+      // If body is already parsed
+      return { data: Array.isArray(response.body) ? response.body : [] };
     }
 
     // Handle direct response
@@ -207,31 +207,35 @@ export const addCondolence = async (condolence: Omit<Condolence, 'id'>): Promise
       path: '/api/condolences',
       options: {
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
         },
-        body: JSON.stringify(condolence)
+        body: {
+          userId: condolence.userId,
+          userName: condolence.userName,
+          text: condolence.text,
+          createdAt: condolence.createdAt
+        }
       }
     }) as any;
 
     // Handle AWS API Gateway response
+    if (response?.data) {
+      return { data: response.data };
+    }
+
     if (response?.body) {
-      try {
-        // If body is a ReadableStream
-        if (typeof response.body.json === 'function') {
-          const jsonData = await response.body.json();
-          return { data: jsonData };
-        }
-        // If body is already parsed
-        if (typeof response.body === 'object') {
-          return { data: response.body };
-        }
-      } catch (parseError) {
-        console.error('Error parsing response:', parseError);
+      // If body is a ReadableStream
+      if (typeof response.body.json === 'function') {
+        const jsonData = await response.body.json();
+        return { data: jsonData };
       }
+      // If body is already parsed
+      return { data: response.body };
     }
 
     // Handle direct response
-    if (response && typeof response === 'object' && !response.body) {
+    if (response && typeof response === 'object') {
       return { data: response };
     }
 

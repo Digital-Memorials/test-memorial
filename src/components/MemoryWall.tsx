@@ -51,7 +51,7 @@ function MemoryWall() {
 
       const memoryData = {
         ...formData,
-        name: user.name,
+        name: user.name || 'Anonymous',
         userId: user.id,
       };
 
