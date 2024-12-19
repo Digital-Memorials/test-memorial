@@ -118,8 +118,11 @@ export const deleteMemory = async (id: string): Promise<void> => {
 export const getCondolences = async (): Promise<{ data: Condolence[] }> => {
   try {
     const response = await get({ apiName: 'memorialAPI', path: '/api/condolences' });
-    return { data: response as unknown as Condolence[] };
+    // Ensure we're handling the response correctly
+    const condolences = response?.Items || response || [];
+    return { data: Array.isArray(condolences) ? condolences : [] };
   } catch (error) {
+    console.error('Error in getCondolences:', error);
     throw new Error('Failed to fetch condolences');
   }
 };
@@ -133,8 +136,14 @@ export const addCondolence = async (condolence: Omit<Condolence, 'id'>): Promise
         body: condolence
       }
     });
-    return { data: response as unknown as Condolence };
+    // Handle the response more safely
+    const newCondolence = response?.Item || response;
+    if (!newCondolence || typeof newCondolence !== 'object') {
+      throw new Error('Invalid response format');
+    }
+    return { data: newCondolence as Condolence };
   } catch (error) {
+    console.error('Error in addCondolence:', error);
     throw new Error('Failed to add condolence');
   }
 };

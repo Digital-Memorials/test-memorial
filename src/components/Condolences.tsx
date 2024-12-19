@@ -26,9 +26,11 @@ function Condolences() {
   const fetchCondolences = async () => {
     try {
       const response = await getCondolences();
-      setCondolences(response.data);
+      setCondolences(Array.isArray(response.data) ? response.data : []);
     } catch (err) {
+      console.error('Error fetching condolences:', err);
       setError('Failed to fetch condolences');
+      setCondolences([]);
     }
   };
 
