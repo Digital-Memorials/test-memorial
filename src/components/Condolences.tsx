@@ -17,7 +17,7 @@ function Condolences() {
   });
   const [error, setError] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const { currentUser } = useAuth();
+  const { user } = useAuth();
 
   useEffect(() => {
     fetchCondolences();
@@ -38,13 +38,13 @@ function Condolences() {
     setIsLoading(true);
 
     try {
-      if (!currentUser) {
+      if (!user) {
         throw new Error('You must be logged in to add a condolence');
       }
 
       const condolenceData = {
         ...formData,
-        userId: currentUser.uid,
+        userId: user.id,
       };
 
       await addCondolence(condolenceData);
@@ -75,7 +75,7 @@ function Condolences() {
       <h2 className="text-2xl font-bold mb-4">Condolences</h2>
       {error && <div className="text-red-500 mb-4">{error}</div>}
       
-      {currentUser && (
+      {user && (
         <form onSubmit={handleSubmit} className="mb-8">
           <div className="mb-4">
             <label className="block text-gray-700 text-sm font-bold mb-2">
@@ -128,7 +128,7 @@ function Condolences() {
             <h3 className="font-bold">{condolence.name}</h3>
             <p className="text-gray-600">{condolence.relation}</p>
             <p className="mt-2">{condolence.message}</p>
-            {currentUser && currentUser.uid === condolence.userId && (
+            {user && user.id === condolence.userId && (
               <button
                 onClick={() => handleDelete(condolence.id)}
                 className="mt-2 text-red-500 hover:text-red-700"
