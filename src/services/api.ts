@@ -140,7 +140,10 @@ export const addMemory = async (memory: Omit<Memory, 'id'>): Promise<{ data: Mem
 
         if (uploadResult?.key) {
           const urlResult = await getUrl({
-            key: uploadResult.key
+            key: uploadResult.key,
+            options: {
+              validateObjectExistence: true
+            }
           });
           memory.mediaUrl = urlResult.url.toString();
         } else {
