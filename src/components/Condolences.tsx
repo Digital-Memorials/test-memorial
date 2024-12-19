@@ -8,85 +8,63 @@ const BookContainer = styled.div`
   max-width: calc(100vw - 2rem);
   margin: 0 auto;
   min-height: 800px;
+  position: relative;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 `;
 
 const BookSpine = styled.div`
   width: 48px;
-  background-color: #E6D5C3;
+  background-color: #D4C4B4;
   position: relative;
   
   &::before {
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(to right, rgba(139, 107, 77, 0.7), transparent);
-  }
-  
-  &::after {
-    content: '';
-    position: absolute;
-    right: 0;
-    top: 0;
-    bottom: 0;
-    width: 2px;
-    background: rgba(139, 107, 77, 0.4);
-  }
-
-  /* Spine decorative lines */
-  &::before {
-    content: '';
-    position: absolute;
-    top: 32px;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: rgba(139, 107, 77, 0.2);
-  }
-
-  &::after {
-    content: '';
-    position: absolute;
-    bottom: 32px;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: rgba(139, 107, 77, 0.2);
+    background: linear-gradient(to right, rgba(139, 107, 77, 0.4), transparent);
   }
 `;
 
 const BookEdge = styled.div`
   width: 48px;
-  background-color: #FAF6F1;
+  background-color: #F5F1EA;
   position: relative;
   overflow: hidden;
 
-  /* Page lines */
+  /* Base gradient for depth */
   &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to right, rgba(0, 0, 0, 0.03), transparent 50%);
+  }
+
+  /* Vertical lines for pages */
+  &::after {
     content: '';
     position: absolute;
     inset: 0;
     background-image: repeating-linear-gradient(
       to right,
       transparent,
-      transparent 1px,
-      rgba(0, 0, 0, 0.03) 1px,
-      transparent 2px
+      transparent 2px,
+      rgba(0, 0, 0, 0.03) 2px,
+      rgba(0, 0, 0, 0.03) 3px
     );
-    background-size: 3px 100%;
+    background-size: 4px 100%;
   }
 
-  /* Horizontal page lines */
-  ${[...Array(12)].map((_, i) => `
-    &::after {
+  /* Multiple horizontal lines */
+  ${[...Array(24)].map((_, i) => `
+    &::before {
       content: '';
       position: absolute;
-      top: ${(i + 1) * 8}%;
+      top: ${(i + 1) * 4}%;
       left: 0;
       right: 0;
       height: 1px;
-      background: rgba(139, 107, 77, 0.1);
-      transform: translateX(${i * 0.3}px);
-      box-shadow: 0 -1px 0 rgba(0, 0, 0, 0.02);
+      background: rgba(0, 0, 0, ${0.02 + (i % 2) * 0.01});
+      transform: translateX(${i * 0.2}px) rotate(${0.1}deg);
     }
   `)}
 `;
@@ -96,50 +74,30 @@ const MainContent = styled.div`
   background: white;
   position: relative;
   min-width: 0;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-  padding: 4rem;
-
-  /* Page corner fold effect */
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 64px;
-    height: 64px;
-    background: linear-gradient(135deg, transparent 50%, rgba(0,0,0,0.02) 50%);
-  }
-
-  /* Page shadow effects */
-  &::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    box-shadow: 
-      inset 6px 0 8px -4px rgba(0,0,0,0.1),
-      inset -6px 0 8px -4px rgba(0,0,0,0.1),
-      inset 0 6px 8px -4px rgba(0,0,0,0.1),
-      inset 0 -6px 8px -4px rgba(0,0,0,0.1);
-  }
+  padding: 3rem 4rem;
+  box-shadow: 
+    inset 1px 0 2px rgba(0, 0, 0, 0.05),
+    inset -1px 0 2px rgba(0, 0, 0, 0.05);
 `;
 
 const Header = styled.header`
   text-align: center;
-  margin-bottom: 4rem;
+  margin-bottom: 3rem;
 `;
 
 const Title = styled.h2`
   font-family: 'Playfair Display', serif;
-  font-size: 3rem;
+  font-size: 2.5rem;
   color: #2D3748;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
+  font-weight: normal;
 `;
 
 const Subtitle = styled.p`
   font-family: 'Lora', serif;
-  font-size: 1.125rem;
-  color: #4A5568;
+  font-size: 1rem;
+  color: #666;
+  line-height: 1.5;
   max-width: 36rem;
   margin: 0 auto;
 `;
@@ -150,70 +108,79 @@ const Form = styled.form`
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-  padding: 2rem;
-  background: rgba(250, 246, 241, 0.5);
-  border-radius: 0.5rem;
-  border: 1px solid rgba(139, 107, 77, 0.1);
 `;
 
 const FormGroup = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.25rem;
 `;
 
 const Label = styled.label`
-  font-family: 'Playfair Display', serif;
-  font-size: 1rem;
-  color: #4A5568;
+  font-family: 'Lora', serif;
+  font-size: 0.875rem;
+  color: #666;
   margin-bottom: 0.25rem;
+  font-weight: normal;
 `;
 
 const Input = styled.input`
   width: 100%;
-  padding: 0.75rem;
-  border: 1px solid rgba(139, 107, 77, 0.2);
+  padding: 0.75rem 1rem;
+  border: 1px solid #E2E8F0;
   border-radius: 0.25rem;
-  font-size: 1rem;
+  font-size: 0.875rem;
   background: white;
+  color: #4A5568;
+  
+  &::placeholder {
+    color: #A0AEC0;
+  }
   
   &:focus {
     outline: none;
-    border-color: rgba(139, 107, 77, 0.4);
-    box-shadow: 0 0 0 3px rgba(139, 107, 77, 0.1);
+    border-color: #CBD5E0;
+    box-shadow: 0 0 0 3px rgba(203, 213, 224, 0.2);
   }
 `;
 
 const TextArea = styled.textarea`
   width: 100%;
-  padding: 0.75rem;
-  border: 1px solid rgba(139, 107, 77, 0.2);
+  padding: 0.75rem 1rem;
+  border: 1px solid #E2E8F0;
   border-radius: 0.25rem;
-  font-size: 1rem;
-  min-height: 120px;
+  font-size: 0.875rem;
+  min-height: 150px;
   resize: vertical;
   background: white;
+  color: #4A5568;
+  
+  &::placeholder {
+    color: #A0AEC0;
+  }
   
   &:focus {
     outline: none;
-    border-color: rgba(139, 107, 77, 0.4);
-    box-shadow: 0 0 0 3px rgba(139, 107, 77, 0.1);
+    border-color: #CBD5E0;
+    box-shadow: 0 0 0 3px rgba(203, 213, 224, 0.2);
   }
 `;
 
 const Button = styled.button`
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.5rem;
   padding: 0.75rem 2rem;
   background-color: #8B6B4D;
   color: white;
   border: none;
   border-radius: 9999px;
-  font-size: 1rem;
+  font-size: 0.875rem;
   cursor: pointer;
   transition: all 0.2s;
   align-self: center;
+  margin-top: 1rem;
   
   &:hover {
     background-color: #75593F;
@@ -225,22 +192,21 @@ const Button = styled.button`
   }
   
   svg {
-    width: 1.25rem;
-    height: 1.25rem;
+    width: 1rem;
+    height: 1rem;
   }
 `;
 
 const CondolenceList = styled.div`
-  max-width: 48rem;
+  max-width: 36rem;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 2rem;
 `;
 
 const CondolenceEntry = styled.article`
-  padding: 2rem;
-  border-bottom: 1px solid rgba(139, 107, 77, 0.1);
+  padding: 2rem 0;
+  border-bottom: 1px solid rgba(203, 213, 224, 0.3);
   
   &:last-child {
     border-bottom: none;
@@ -249,54 +215,42 @@ const CondolenceEntry = styled.article`
 
 const Message = styled.blockquote`
   font-family: 'Lora', serif;
-  font-size: 1.125rem;
+  font-size: 1rem;
   color: #4A5568;
   line-height: 1.6;
   margin: 0 0 1rem 0;
-  padding-left: 2rem;
+  padding-left: 1.5rem;
   position: relative;
+  font-style: italic;
   
   &::before {
     content: '"';
     position: absolute;
     left: 0;
-    top: -0.5rem;
-    font-size: 2.5rem;
+    top: -0.25rem;
+    font-size: 2rem;
     color: #8B6B4D;
     font-family: 'Playfair Display', serif;
+    opacity: 0.5;
   }
 `;
 
 const Author = styled.cite`
-  font-family: 'Playfair Display', serif;
-  font-size: 1.125rem;
-  color: #2D3748;
-  font-style: italic;
+  font-family: 'Lora', serif;
+  font-size: 0.875rem;
+  color: #4A5568;
+  font-style: normal;
   display: block;
-  margin-top: 0.5rem;
 `;
 
 const Relation = styled.span`
+  color: #718096;
   font-size: 0.875rem;
-  color: #8B6B4D;
-  font-style: normal;
+  
   &::before {
     content: '•';
     margin: 0 0.5rem;
-  }
-`;
-
-const DeleteButton = styled.button`
-  color: #A0AEC0;
-  transition: color 0.2s;
-  
-  &:hover {
-    color: #E53E3E;
-  }
-  
-  svg {
-    width: 1.25rem;
-    height: 1.25rem;
+    color: #CBD5E0;
   }
 `;
 
