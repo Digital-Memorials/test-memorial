@@ -181,7 +181,7 @@ export const getCondolences = async (): Promise<{ data: Condolence[] }> => {
     // Handle different response formats
     if (response && typeof response === 'object') {
       // If response has data property
-      if ('data' in response) {
+      if ('data' in response && Array.isArray(response.data)) {
         return { data: parseCondolences(response.data) };
       }
 
@@ -191,7 +191,16 @@ export const getCondolences = async (): Promise<{ data: Condolence[] }> => {
           const parsedData = typeof response.body === 'string' 
             ? JSON.parse(response.body) 
             : response.body;
-          return { data: parseCondolences(parsedData) };
+          
+          // If body has data property
+          if ('data' in parsedData && Array.isArray(parsedData.data)) {
+            return { data: parseCondolences(parsedData.data) };
+          }
+          
+          // If body is the array itself
+          if (Array.isArray(parsedData)) {
+            return { data: parseCondolences(parsedData) };
+          }
         } catch (e) {
           console.error('Error parsing response body:', e);
         }
@@ -242,18 +251,18 @@ export const addCondolence = async (condolence: Omit<Condolence, 'id'>): Promise
 
     // Handle different response formats
     if (response && typeof response === 'object') {
-      // If response is already parsed
-      if ('data' in response && isCondolence(response.data)) {
+      // If response has success and data properties
+      if ('success' in response && 'data' in response && isCondolence(response.data)) {
         return { data: response.data };
       }
 
-      // If response has a body
+      // If response has a body with success and data properties
       if ('body' in response) {
         const body = response.body;
         try {
           const parsedData = typeof body === 'string' ? JSON.parse(body) : body;
-          if (isCondolence(parsedData)) {
-            return { data: parsedData };
+          if (parsedData?.success && parsedData?.data && isCondolence(parsedData.data)) {
+            return { data: parsedData.data };
           }
         } catch (e) {
           console.error('Error parsing response body:', e);
