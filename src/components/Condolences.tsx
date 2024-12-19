@@ -7,6 +7,7 @@ const BookContainer = styled.div`
   display: flex;
   max-width: calc(100vw - 2rem);
   margin: 0 auto;
+  min-height: 800px;
 `;
 
 const BookSpine = styled.div`
@@ -30,6 +31,27 @@ const BookSpine = styled.div`
     width: 2px;
     background: rgba(139, 107, 77, 0.4);
   }
+
+  /* Spine decorative lines */
+  &::before {
+    content: '';
+    position: absolute;
+    top: 32px;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: rgba(139, 107, 77, 0.2);
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: 32px;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: rgba(139, 107, 77, 0.2);
+  }
 `;
 
 const BookEdge = styled.div`
@@ -37,7 +59,8 @@ const BookEdge = styled.div`
   background-color: #FAF6F1;
   position: relative;
   overflow: hidden;
-  
+
+  /* Page lines */
   &::before {
     content: '';
     position: absolute;
@@ -51,6 +74,21 @@ const BookEdge = styled.div`
     );
     background-size: 3px 100%;
   }
+
+  /* Horizontal page lines */
+  ${[...Array(12)].map((_, i) => `
+    &::after {
+      content: '';
+      position: absolute;
+      top: ${(i + 1) * 8}%;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: rgba(139, 107, 77, 0.1);
+      transform: translateX(${i * 0.3}px);
+      box-shadow: 0 -1px 0 rgba(0, 0, 0, 0.02);
+    }
+  `)}
 `;
 
 const MainContent = styled.div`
@@ -60,6 +98,30 @@ const MainContent = styled.div`
   min-width: 0;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
   padding: 4rem;
+
+  /* Page corner fold effect */
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 64px;
+    height: 64px;
+    background: linear-gradient(135deg, transparent 50%, rgba(0,0,0,0.02) 50%);
+  }
+
+  /* Page shadow effects */
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    box-shadow: 
+      inset 6px 0 8px -4px rgba(0,0,0,0.1),
+      inset -6px 0 8px -4px rgba(0,0,0,0.1),
+      inset 0 6px 8px -4px rgba(0,0,0,0.1),
+      inset 0 -6px 8px -4px rgba(0,0,0,0.1);
+  }
 `;
 
 const Header = styled.header`
@@ -74,28 +136,6 @@ const Title = styled.h2`
   margin-bottom: 1.5rem;
 `;
 
-const Divider = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 1.5rem;
-  margin-bottom: 2rem;
-  
-  &::before, &::after {
-    content: '';
-    height: 1px;
-    width: 4rem;
-    background: linear-gradient(to right, transparent, rgba(139, 107, 77, 0.5), transparent);
-  }
-  
-  span {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background-color: rgba(139, 107, 77, 0.5);
-  }
-`;
-
 const Subtitle = styled.p`
   font-family: 'Lora', serif;
   font-size: 1.125rem;
@@ -106,10 +146,14 @@ const Subtitle = styled.p`
 
 const Form = styled.form`
   max-width: 36rem;
-  margin: 0 auto 3rem;
+  margin: 0 auto 4rem;
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+  padding: 2rem;
+  background: rgba(250, 246, 241, 0.5);
+  border-radius: 0.5rem;
+  border: 1px solid rgba(139, 107, 77, 0.1);
 `;
 
 const FormGroup = styled.div`
@@ -120,16 +164,18 @@ const FormGroup = styled.div`
 
 const Label = styled.label`
   font-family: 'Playfair Display', serif;
-  font-size: 1.125rem;
-  color: #2D3748;
+  font-size: 1rem;
+  color: #4A5568;
+  margin-bottom: 0.25rem;
 `;
 
 const Input = styled.input`
-  padding: 1rem;
+  width: 100%;
+  padding: 0.75rem;
   border: 1px solid rgba(139, 107, 77, 0.2);
-  border-radius: 0.5rem;
-  background-color: rgba(250, 246, 241, 0.5);
+  border-radius: 0.25rem;
   font-size: 1rem;
+  background: white;
   
   &:focus {
     outline: none;
@@ -139,14 +185,14 @@ const Input = styled.input`
 `;
 
 const TextArea = styled.textarea`
-  padding: 1rem;
+  width: 100%;
+  padding: 0.75rem;
   border: 1px solid rgba(139, 107, 77, 0.2);
-  border-radius: 0.5rem;
-  background-color: rgba(250, 246, 241, 0.5);
+  border-radius: 0.25rem;
   font-size: 1rem;
-  min-height: 150px;
-  font-family: 'Lora', serif;
+  min-height: 120px;
   resize: vertical;
+  background: white;
   
   &:focus {
     outline: none;
@@ -166,11 +212,16 @@ const Button = styled.button`
   border-radius: 9999px;
   font-size: 1rem;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all 0.2s;
   align-self: center;
   
   &:hover {
     background-color: #75593F;
+    transform: translateY(-1px);
+  }
+  
+  &:active {
+    transform: translateY(0);
   }
   
   svg {
@@ -188,29 +239,12 @@ const CondolenceList = styled.div`
 `;
 
 const CondolenceEntry = styled.article`
-  position: relative;
-  background-color: rgba(250, 246, 241, 0.3);
-  border-radius: 0.5rem;
-  padding: 1.5rem;
-  transition: all 0.3s;
+  padding: 2rem;
+  border-bottom: 1px solid rgba(139, 107, 77, 0.1);
   
-  &:hover {
-    background-color: rgba(250, 246, 241, 0.5);
+  &:last-child {
+    border-bottom: none;
   }
-`;
-
-const QuoteIcon = styled.div`
-  position: absolute;
-  top: -0.75rem;
-  left: 1.5rem;
-  width: 1.5rem;
-  height: 1.5rem;
-  background-color: rgba(139, 107, 77, 0.1);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #8B6B4D;
 `;
 
 const Message = styled.blockquote`
@@ -219,27 +253,37 @@ const Message = styled.blockquote`
   color: #4A5568;
   line-height: 1.6;
   margin: 0 0 1rem 0;
-  padding-left: 1rem;
-`;
-
-const Footer = styled.footer`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-top: 1rem;
-  border-top: 1px solid rgba(139, 107, 77, 0.1);
+  padding-left: 2rem;
+  position: relative;
+  
+  &::before {
+    content: '"';
+    position: absolute;
+    left: 0;
+    top: -0.5rem;
+    font-size: 2.5rem;
+    color: #8B6B4D;
+    font-family: 'Playfair Display', serif;
+  }
 `;
 
 const Author = styled.cite`
   font-family: 'Playfair Display', serif;
   font-size: 1.125rem;
   color: #2D3748;
-  font-style: normal;
+  font-style: italic;
+  display: block;
+  margin-top: 0.5rem;
 `;
 
-const Relation = styled.p`
+const Relation = styled.span`
   font-size: 0.875rem;
   color: #8B6B4D;
+  font-style: normal;
+  &::before {
+    content: '•';
+    margin: 0 0.5rem;
+  }
 `;
 
 const DeleteButton = styled.button`
@@ -310,7 +354,6 @@ export const Condolences: React.FC = () => {
       <MainContent>
         <Header>
           <Title>Book of Condolences</Title>
-          <Divider><span /></Divider>
           <Subtitle>
             Share your condolences, memories, and messages of support for the family in this
             digital book of remembrance.
@@ -350,28 +393,23 @@ export const Condolences: React.FC = () => {
         <CondolenceList>
           {condolences.map((condolence) => (
             <CondolenceEntry key={condolence.id}>
-              <QuoteIcon>
-                <svg fill="currentColor" viewBox="0 0 24 24" className="w-3 h-3">
-                  <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
-                </svg>
-              </QuoteIcon>
               <Message>{condolence.message}</Message>
-              <Footer>
-                <div>
-                  <Author>{condolence.name}</Author>
-                  {condolence.relation && <Relation>{condolence.relation}</Relation>}
-                </div>
-                {user && user.id === condolence.userId && (
-                  <DeleteButton
-                    onClick={() => handleDelete(condolence.id, condolence.userId)}
-                    title="Delete condolence"
-                  >
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
-                  </DeleteButton>
-                )}
-              </Footer>
+              <div>
+                <Author>
+                  {condolence.name}
+                  <Relation>{condolence.relation}</Relation>
+                </Author>
+              </div>
+              {user && user.id === condolence.userId && (
+                <DeleteButton
+                  onClick={() => handleDelete(condolence.id, condolence.userId)}
+                  title="Delete condolence"
+                >
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </DeleteButton>
+              )}
             </CondolenceEntry>
           ))}
         </CondolenceList>

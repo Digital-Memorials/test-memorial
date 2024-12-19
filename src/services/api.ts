@@ -218,36 +218,25 @@ export const addCondolence = async (condolence: Omit<Condolence, 'id'>): Promise
       apiName: 'memorialAPI',
       path: '/api/condolences',
       options: {
+        headers: {
+          'Content-Type': 'application/json'
+        },
         body: condolence
       }
-    });
-    
-    // Handle different possible response formats
-    let newCondolence: Condolence;
-    
-    if (typeof response === 'object' && response !== null) {
-      // Try to extract the condolence data from different possible locations
-      newCondolence = (response as any).body || // AWS API Gateway format
-                     (response as any).data ||   // Standard REST format
-                     response;                   // Direct response
-      
-      // Validate the condolence data
-      if (!newCondolence.id || !newCondolence.userId || !newCondolence.message) {
-        console.error('Invalid condolence data:', newCondolence);
-        throw new Error('Invalid response format');
-      }
-    } else {
-      console.error('Invalid response:', response);
-      throw new Error('Invalid response format');
-    }
+    }) as any; // Type assertion for AWS API Gateway response
 
-    return { data: newCondolence };
+    if (response && typeof response === 'object') {
+      const newCondolence = response.body || response;
+      
+      if (newCondolence && typeof newCondolence === 'object') {
+        return { data: newCondolence as Condolence };
+      }
+    }
+    
+    throw new Error('Invalid response format');
   } catch (error) {
     console.error('Error in addCondolence:', error);
-    if (error instanceof Error) {
-      throw error;
-    }
-    throw new Error('Failed to add condolence');
+    throw error;
   }
 };
 
