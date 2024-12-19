@@ -22,31 +22,58 @@ export interface Condolence {
 // Memories API
 export const getMemories = async (): Promise<{ data: Memory[] }> => {
   try {
-    const response = await get({ apiName: 'memorialAPI', path: '/api/memories' }) as unknown as { body: Memory[] };
-    const memories = response?.body || [];
+    const response = await get({ apiName: 'memorialAPI', path: '/api/memories' });
     
-    // Get signed URLs for all media
-    const memoriesWithUrls = await Promise.all(
-      memories.map(async (memory) => {
-        if (memory.mediaType === 'image' && memory.mediaUrl) {
-          try {
-            const signedUrl = await getUrl({
-              key: memory.mediaUrl,
-              options: {
-                expiresIn: 3600 // URL expires in 1 hour
-              }
-            });
-            return { ...memory, mediaUrl: signedUrl.url.toString() };
-          } catch (err) {
-            console.error('Failed to get signed URL:', err);
-            return memory;
+    // Handle different possible response formats
+    let memories: Memory[];
+    
+    if (typeof response === 'object' && response !== null) {
+      // Try to extract the memories data from different possible locations
+      memories = (response as any).body || // AWS API Gateway format
+                (response as any).data ||   // Standard REST format
+                response;                   // Direct response
+      
+      // Ensure we have an array
+      if (!Array.isArray(memories)) {
+        console.error('Response is not an array:', memories);
+        return { data: [] };
+      }
+      
+      // Validate each memory
+      memories = memories.filter(memory => 
+        memory &&
+        typeof memory === 'object' &&
+        'id' in memory &&
+        'userId' in memory &&
+        'message' in memory
+      );
+
+      // Get signed URLs for all media
+      const memoriesWithUrls = await Promise.all(
+        memories.map(async (memory) => {
+          if (memory.mediaType === 'image' && memory.mediaUrl) {
+            try {
+              const signedUrl = await getUrl({
+                key: memory.mediaUrl,
+                options: {
+                  expiresIn: 3600 // URL expires in 1 hour
+                }
+              });
+              return { ...memory, mediaUrl: signedUrl.url.toString() };
+            } catch (err) {
+              console.error('Failed to get signed URL:', err);
+              return memory;
+            }
           }
-        }
-        return memory;
-      })
-    );
-    
-    return { data: memoriesWithUrls };
+          return memory;
+        })
+      );
+      
+      return { data: memoriesWithUrls };
+    } else {
+      console.error('Invalid response:', response);
+      return { data: [] };
+    }
   } catch (error) {
     console.error('Error in getMemories:', error);
     throw new Error('Failed to fetch memories');
@@ -75,27 +102,48 @@ export const addMemory = async (memory: Omit<Memory, 'id'>): Promise<{ data: Mem
       options: {
         body: memory
       }
-    }) as unknown as { body: Memory };
+    });
     
-    const newMemory = response?.body;
-    if (!newMemory || typeof newMemory !== 'object') {
+    // Handle different possible response formats
+    let newMemory: Memory;
+    
+    if (typeof response === 'object' && response !== null) {
+      // Try to extract the memory data from different possible locations
+      newMemory = (response as any).body || // AWS API Gateway format
+                 (response as any).data ||   // Standard REST format
+                 response;                   // Direct response
+      
+      // Validate the memory data
+      if (!newMemory.id || !newMemory.userId || !newMemory.message) {
+        console.error('Invalid memory data:', newMemory);
+        throw new Error('Invalid response format');
+      }
+
+      // Get signed URL if it's an image
+      if (newMemory.mediaType === 'image' && newMemory.mediaUrl) {
+        try {
+          const signedUrl = await getUrl({
+            key: newMemory.mediaUrl,
+            options: {
+              expiresIn: 3600
+            }
+          });
+          newMemory = { ...newMemory, mediaUrl: signedUrl.url.toString() };
+        } catch (err) {
+          console.error('Failed to get signed URL:', err);
+        }
+      }
+    } else {
+      console.error('Invalid response:', response);
       throw new Error('Invalid response format');
     }
-    
-    // Get signed URL for the newly added memory
-    if (newMemory.mediaType === 'image' && newMemory.mediaUrl) {
-      const signedUrl = await getUrl({
-        key: newMemory.mediaUrl,
-        options: {
-          expiresIn: 3600
-        }
-      });
-      return { data: { ...newMemory, mediaUrl: signedUrl.url.toString() } };
-    }
-    
+
     return { data: newMemory };
   } catch (error) {
     console.error('Memory upload error:', error);
+    if (error instanceof Error) {
+      throw error;
+    }
     throw new Error('Failed to add memory');
   }
 };
@@ -103,17 +151,23 @@ export const addMemory = async (memory: Omit<Memory, 'id'>): Promise<{ data: Mem
 export const deleteMemory = async (id: string): Promise<void> => {
   try {
     // Get the memory first to check if it has media to delete
-    const memory = await get({ 
+    const response = await get({ 
       apiName: 'memorialAPI', 
       path: `/api/memories/${id}` 
-    }) as unknown as Memory;
-    
-    if (memory.mediaType !== 'none' && memory.mediaUrl) {
+    });
+
+    let memory: Memory | null = null;
+    if (typeof response === 'object' && response !== null) {
+      memory = (response as any).body || (response as any).data || response;
+    }
+
+    if (memory && memory.mediaType !== 'none' && memory.mediaUrl) {
       await remove({ key: memory.mediaUrl });
     }
 
     await del({ apiName: 'memorialAPI', path: `/api/memories/${id}` });
   } catch (error) {
+    console.error('Error deleting memory:', error);
     throw new Error('Failed to delete memory');
   }
 };
@@ -121,10 +175,37 @@ export const deleteMemory = async (id: string): Promise<void> => {
 // Condolences API
 export const getCondolences = async (): Promise<{ data: Condolence[] }> => {
   try {
-    const response = await get({ apiName: 'memorialAPI', path: '/api/condolences' }) as unknown as { body: Condolence[] };
-    // Ensure we're handling the response correctly
-    const condolences = response?.body || [];
-    return { data: Array.isArray(condolences) ? condolences : [] };
+    const response = await get({ apiName: 'memorialAPI', path: '/api/condolences' });
+    
+    // Handle different possible response formats
+    let condolences: Condolence[];
+    
+    if (typeof response === 'object' && response !== null) {
+      // Try to extract the condolences data from different possible locations
+      condolences = (response as any).body || // AWS API Gateway format
+                   (response as any).data ||   // Standard REST format
+                   response;                   // Direct response
+      
+      // Ensure we have an array
+      if (!Array.isArray(condolences)) {
+        console.error('Response is not an array:', condolences);
+        return { data: [] };
+      }
+      
+      // Validate each condolence
+      condolences = condolences.filter(condolence => 
+        condolence &&
+        typeof condolence === 'object' &&
+        'id' in condolence &&
+        'userId' in condolence &&
+        'message' in condolence
+      );
+    } else {
+      console.error('Invalid response:', response);
+      return { data: [] };
+    }
+
+    return { data: condolences };
   } catch (error) {
     console.error('Error in getCondolences:', error);
     throw new Error('Failed to fetch condolences');
@@ -139,16 +220,33 @@ export const addCondolence = async (condolence: Omit<Condolence, 'id'>): Promise
       options: {
         body: condolence
       }
-    }) as unknown as { body: Condolence };
+    });
     
-    // Handle the response more safely
-    const newCondolence = response?.body;
-    if (!newCondolence || typeof newCondolence !== 'object') {
+    // Handle different possible response formats
+    let newCondolence: Condolence;
+    
+    if (typeof response === 'object' && response !== null) {
+      // Try to extract the condolence data from different possible locations
+      newCondolence = (response as any).body || // AWS API Gateway format
+                     (response as any).data ||   // Standard REST format
+                     response;                   // Direct response
+      
+      // Validate the condolence data
+      if (!newCondolence.id || !newCondolence.userId || !newCondolence.message) {
+        console.error('Invalid condolence data:', newCondolence);
+        throw new Error('Invalid response format');
+      }
+    } else {
+      console.error('Invalid response:', response);
       throw new Error('Invalid response format');
     }
+
     return { data: newCondolence };
   } catch (error) {
     console.error('Error in addCondolence:', error);
+    if (error instanceof Error) {
+      throw error;
+    }
     throw new Error('Failed to add condolence');
   }
 };
