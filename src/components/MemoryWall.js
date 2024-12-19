@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { getUrl } from '@aws-amplify/storage';
 import { getMemories, addMemory, deleteMemory } from '../services/api';
 import { RequireAuth } from './auth/RequireAuth';
 import { useAuth } from '../contexts/AuthContext';
