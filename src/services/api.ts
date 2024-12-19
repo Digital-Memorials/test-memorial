@@ -190,10 +190,24 @@ export const getCondolences = async (): Promise<{ data: Condolence[] }> => {
       const resolvedResponse = await response.response;
       console.log('Resolved response:', resolvedResponse);
       if (resolvedResponse?.body) {
-        const body = typeof resolvedResponse.body === 'string' 
-          ? JSON.parse(resolvedResponse.body) 
-          : resolvedResponse.body;
-        jsonData = body;
+        if (resolvedResponse.body instanceof ReadableStream) {
+          const reader = resolvedResponse.body.getReader();
+          const chunks = [];
+          
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            chunks.push(value);
+          }
+          
+          const decoder = new TextDecoder();
+          const text = chunks.map(chunk => decoder.decode(chunk)).join('');
+          jsonData = JSON.parse(text);
+        } else {
+          jsonData = typeof resolvedResponse.body === 'string' 
+            ? JSON.parse(resolvedResponse.body) 
+            : resolvedResponse.body;
+        }
       } else {
         throw new Error('No response body received');
       }
@@ -258,10 +272,24 @@ export const addCondolence = async (condolence: Omit<Condolence, 'id'>): Promise
       const resolvedResponse = await response.response;
       console.log('Resolved response:', resolvedResponse);
       if (resolvedResponse?.body) {
-        const body = typeof resolvedResponse.body === 'string' 
-          ? JSON.parse(resolvedResponse.body) 
-          : resolvedResponse.body;
-        jsonData = body;
+        if (resolvedResponse.body instanceof ReadableStream) {
+          const reader = resolvedResponse.body.getReader();
+          const chunks = [];
+          
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            chunks.push(value);
+          }
+          
+          const decoder = new TextDecoder();
+          const text = chunks.map(chunk => decoder.decode(chunk)).join('');
+          jsonData = JSON.parse(text);
+        } else {
+          jsonData = typeof resolvedResponse.body === 'string' 
+            ? JSON.parse(resolvedResponse.body) 
+            : resolvedResponse.body;
+        }
       } else {
         throw new Error('No response body received');
       }
