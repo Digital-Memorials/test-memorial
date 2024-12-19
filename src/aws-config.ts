@@ -58,7 +58,7 @@ const amplifyConfig: ResourcesConfig = {
   Storage: {
     S3: {
       bucket: config.aws_user_files_s3_bucket,
-      region: config.aws_project_region,
+      region: config.aws_project_region
     }
   }
 };

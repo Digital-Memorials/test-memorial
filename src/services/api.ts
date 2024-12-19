@@ -1,5 +1,5 @@
 import { get, post, del } from '@aws-amplify/api';
-import { uploadData, getUrl } from '@aws-amplify/storage';
+import { uploadData, getUrl } from 'aws-amplify/storage';
 import { Condolence } from '../types';
 
 // Types
@@ -131,7 +131,7 @@ export const addMemory = async (memory: Omit<Memory, 'id'>): Promise<{ data: Mem
     if (memory.mediaType !== 'none' && memory.mediaUrl) {
       try {
         const file = await fetch(memory.mediaUrl).then(r => r.blob());
-        const filename = `memories/${Date.now()}-${memory.userId}.${memory.mediaType === 'image' ? 'jpg' : 'mp4'}`;
+        const filename = `public/memories/${Date.now()}-${memory.userId}${memory.mediaType === 'image' ? '.jpg' : '.mp4'}`;
         
         const uploadResult = await uploadData({
           data: file,
@@ -140,10 +140,7 @@ export const addMemory = async (memory: Omit<Memory, 'id'>): Promise<{ data: Mem
 
         if (uploadResult?.key) {
           const urlResult = await getUrl({
-            key: uploadResult.key,
-            options: {
-              validateObjectExistence: true
-            }
+            key: uploadResult.key
           });
           memory.mediaUrl = urlResult.url.toString();
         } else {
