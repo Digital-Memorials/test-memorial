@@ -1,0 +1,117 @@
+.memory-wall {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.memory-wall h2 {
+  text-align: center;
+  font-size: 2rem;
+  margin-bottom: 2rem;
+  color: #333;
+}
+
+.error-message {
+  background-color: #fee2e2;
+  border: 1px solid #ef4444;
+  color: #991b1b;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  border-radius: 4px;
+  text-align: center;
+}
+
+.memory-form {
+  max-width: 600px;
+  margin: 0 auto 3rem;
+  padding: 1.5rem;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.memory-form textarea {
+  width: 100%;
+  min-height: 120px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  resize: vertical;
+}
+
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.file-input {
+  flex: 1;
+}
+
+.memory-form button {
+  padding: 0.75rem 1.5rem;
+  background-color: #8B6B4D;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.memory-form button:hover {
+  background-color: #75593F;
+}
+
+.memory-form button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.memories-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 2rem;
+}
+
+.memory-card {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.memory-header {
+  padding: 1rem;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.memory-author {
+  font-weight: 600;
+  color: #333;
+}
+
+.memory-date {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.memory-message {
+  padding: 1rem;
+  color: #444;
+  line-height: 1.5;
+}
+
+.memory-media {
+  width: 100%;
+  max-height: 300px;
+  object-fit: cover;
+}
+
+video.memory-media {
+  background-color: black;
+} 
