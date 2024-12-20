@@ -132,21 +132,32 @@ export const addMemory = async (memory: Omit<Memory, 'id'>): Promise<{ data: Mem
     if (memory.mediaType !== 'none' && memory.mediaUrl) {
       try {
         // Verify auth state before upload
-        await getCurrentUser();
+        const user = await getCurrentUser();
+        if (!user) {
+          throw new Error('User must be authenticated to upload media');
+        }
         
         const file = await fetch(memory.mediaUrl).then(r => r.blob());
         const filename = `public/memories/${Date.now()}-${memory.userId}${memory.mediaType === 'image' ? '.jpg' : '.mp4'}`;
         
         console.log('Starting S3 upload with filename:', filename);
+        console.log('Current user:', user);
+
         const uploadResult = await uploadData({
           data: file,
-          key: filename
+          key: filename,
+          options: {
+            bucket: process.env.REACT_APP_S3_BUCKET
+          }
         }).result;
         console.log('Upload result:', uploadResult);
 
         if (uploadResult?.key) {
           const urlResult = await getUrl({
-            key: uploadResult.key
+            key: uploadResult.key,
+            options: {
+              bucket: process.env.REACT_APP_S3_BUCKET
+            }
           });
           memory.mediaUrl = urlResult.url.toString();
           console.log('Got signed URL:', memory.mediaUrl);
@@ -155,6 +166,9 @@ export const addMemory = async (memory: Omit<Memory, 'id'>): Promise<{ data: Mem
         }
       } catch (uploadError) {
         console.error('Error uploading to S3:', uploadError);
+        if (uploadError instanceof Error) {
+          throw new Error(`Failed to upload media: ${uploadError.message}`);
+        }
         throw new Error('Failed to upload media');
       }
     }
