@@ -26,6 +26,9 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
       setShowVerification(true);
     } catch (err) {
       console.error('Registration error:', err);
+      setVerificationError(
+        err instanceof Error ? err.message : 'Failed to register'
+      );
     } finally {
       setIsLoading(false);
     }
@@ -37,9 +40,16 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
     setVerificationError(null);
     try {
       await verifyEmail(email, verificationCode);
-      // After successful verification, automatically log in
-      await login(email, password);
-      onSuccess?.();
+      // Only after verification is confirmed, attempt login
+      try {
+        await login(email, password);
+        onSuccess?.();
+      } catch (loginErr) {
+        console.error('Login error after verification:', loginErr);
+        setVerificationError('Verification successful. Please proceed to login.');
+        // Redirect to login page instead of auto-login
+        window.location.href = '/login';
+      }
     } catch (err) {
       console.error('Verification error:', err);
       setVerificationError(

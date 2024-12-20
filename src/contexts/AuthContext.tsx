@@ -69,22 +69,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setError(null);
       const { isSignedIn, nextStep } = await signIn({ username: email, password });
       
-      if (!isSignedIn && nextStep?.signInStep === 'CONFIRM_SIGN_UP') {
-        setError('Please verify your email first');
-        throw new Error('CONFIRM_SIGN_UP');
-      }
-
-      if (isSignedIn) {
-        await checkSession(); // Use checkSession instead of checkUser
-      } else {
+      if (!isSignedIn) {
+        if (nextStep?.signInStep === 'CONFIRM_SIGN_UP') {
+          throw new Error('User is not confirmed');
+        }
         throw new Error('Sign in failed');
       }
+
+      // Even if sign in succeeds, we need to verify the email is confirmed
+      const userData = await getCurrentUser();
+      const attributes = await fetchUserAttributes();
+      
+      if (attributes.email_verified !== 'true') {
+        await signOut();
+        throw new Error('User is not confirmed');
+      }
+
+      await checkSession();
     } catch (err) {
       console.error('Login error:', err);
       if (err instanceof AuthError) {
         setError(err.message);
         throw err;
-      } else if (err instanceof Error && err.message === 'CONFIRM_SIGN_UP') {
+      } else if (err instanceof Error) {
+        setError(err.message);
         throw err;
       } else {
         setError('Failed to sign in');
