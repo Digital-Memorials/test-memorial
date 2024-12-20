@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { signIn, signUp, signOut, getCurrentUser, fetchUserAttributes, confirmSignUp, resetPassword, confirmResetPassword } from 'aws-amplify/auth';
-import { AuthError } from 'aws-amplify/auth';
+import { AuthError } from '@aws-amplify/auth';
 import { AuthUser } from '../types';
 
 interface AuthContextType {
@@ -129,30 +129,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
         .join(' ');
 
-      const { nextStep } = await signUp({
-        username: email,
-        password,
-        options: {
-          userAttributes: {
-            email,
-            name: formattedName // Store properly formatted name
-          },
-          autoSignIn: true
-        }
-      });
+      try {
+        const { isSignUpComplete, nextStep } = await signUp({
+          username: email,
+          password,
+          options: {
+            userAttributes: {
+              email,
+              name: formattedName
+            },
+            autoSignIn: true
+          }
+        });
 
-      if (!nextStep) {
-        throw new Error('No sign-up step returned');
-      }
-
-      switch (nextStep.signUpStep) {
-        case 'CONFIRM_SIGN_UP':
+        if (nextStep?.signUpStep === 'CONFIRM_SIGN_UP') {
           return { requiresVerification: true };
-        case 'DONE':
+        }
+
+        if (isSignUpComplete) {
           await login(email, password);
           return { requiresVerification: false };
-        default:
-          throw new Error(`Unexpected signup step: ${nextStep.signUpStep}`);
+        }
+
+        throw new Error('Unexpected signup response');
+      } catch (signUpError) {
+        console.error('SignUp error:', signUpError);
+        if (signUpError instanceof AuthError) {
+          setError(signUpError.message);
+        } else {
+          setError('Failed to register account');
+        }
+        throw signUpError;
       }
     } catch (err) {
       console.error('Registration error:', err);

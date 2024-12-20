@@ -21,7 +21,6 @@ Amplify.configure({
     Cognito: {
       userPoolId: requiredEnvVars.userPoolId,
       userPoolClientId: requiredEnvVars.userPoolClientId,
-      signUpVerificationMethod: 'code',
       loginWith: {
         email: true,
         phone: false,
