@@ -2,32 +2,30 @@ import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { resendSignUpCode } from 'aws-amplify/auth';
 
-interface LoginFormProps {
+interface RegisterFormProps {
   onSuccess?: () => void;
 }
 
-export function LoginForm({ onSuccess }: LoginFormProps) {
+export function RegisterForm({ onSuccess }: RegisterFormProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
   const [verificationCode, setVerificationCode] = useState('');
-  const { login, verifyEmail, error } = useAuth();
+  const { register, verifyEmail, login, error } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [showVerification, setShowVerification] = useState(false);
   const [verificationError, setVerificationError] = useState<string | null>(null);
   const [resendCooldown, setResendCooldown] = useState(0);
+  const [resendLoading, setResendLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     try {
-      await login(email, password);
-      onSuccess?.();
+      await register(email, password, name);
+      setShowVerification(true);
     } catch (err) {
-      console.error('Login error:', err);
-      if (err instanceof Error && err.message.includes('User is not confirmed')) {
-        setShowVerification(true);
-        setVerificationError('Please verify your email address to continue');
-      }
+      console.error('Registration error:', err);
     } finally {
       setIsLoading(false);
     }
@@ -53,9 +51,10 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
   };
 
   const handleResendCode = async () => {
-    if (resendCooldown > 0) return;
+    if (resendCooldown > 0 || resendLoading) return;
     
     try {
+      setResendLoading(true);
       await resendSignUpCode({ username: email });
       // Start cooldown timer
       setResendCooldown(60);
@@ -73,6 +72,8 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
       setVerificationError(
         err instanceof Error ? err.message : 'Failed to resend verification code'
       );
+    } finally {
+      setResendLoading(false);
     }
   };
 
@@ -124,11 +125,13 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
             <button
               type="button"
               onClick={handleResendCode}
-              disabled={resendCooldown > 0}
+              disabled={resendCooldown > 0 || resendLoading}
               className="w-full flex justify-center py-2 px-4 border border-sepia-300 rounded-md shadow-sm text-sm font-medium text-sepia-700 bg-white hover:bg-sepia-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sepia-500 disabled:opacity-50"
             >
               {resendCooldown > 0
                 ? `Resend Code (${resendCooldown}s)`
+                : resendLoading
+                ? 'Sending...'
                 : 'Resend Code'}
             </button>
           </div>
@@ -139,6 +142,19 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      <div>
+        <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+          Full Name
+        </label>
+        <input
+          type="text"
+          id="name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-sepia-500 focus:ring-sepia-500 sm:text-sm"
+          required
+        />
+      </div>
       <div>
         <label htmlFor="email" className="block text-sm font-medium text-gray-700">
           Email
@@ -163,6 +179,7 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
           onChange={(e) => setPassword(e.target.value)}
           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-sepia-500 focus:ring-sepia-500 sm:text-sm"
           required
+          minLength={8}
         />
       </div>
       {error && (
@@ -173,8 +190,8 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
         disabled={isLoading}
         className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-sepia-600 hover:bg-sepia-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sepia-500 disabled:opacity-50"
       >
-        {isLoading ? 'Signing in...' : 'Sign in'}
+        {isLoading ? 'Creating Account...' : 'Create Account'}
       </button>
     </form>
   );
-} 
+}
