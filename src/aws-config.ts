@@ -63,4 +63,12 @@ const amplifyConfig: ResourcesConfig = {
   }
 };
 
+// Log configuration for debugging
+console.log('Amplify Configuration:', {
+  region: config.aws_project_region,
+  userPoolId: config.aws_user_pools_id,
+  bucket: config.aws_user_files_s3_bucket,
+  endpoint: config.aws_cloud_logic_custom[0].endpoint
+});
+
 Amplify.configure(amplifyConfig); 

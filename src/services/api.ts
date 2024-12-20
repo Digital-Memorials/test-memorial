@@ -1,5 +1,6 @@
 import { get, post, del } from '@aws-amplify/api';
 import { uploadData, getUrl } from 'aws-amplify/storage';
+import { getCurrentUser } from 'aws-amplify/auth';
 import { Condolence } from '../types';
 
 // Types
@@ -130,19 +131,25 @@ export const addMemory = async (memory: Omit<Memory, 'id'>): Promise<{ data: Mem
     // If there's media, upload to S3 first
     if (memory.mediaType !== 'none' && memory.mediaUrl) {
       try {
+        // Verify auth state before upload
+        await getCurrentUser();
+        
         const file = await fetch(memory.mediaUrl).then(r => r.blob());
         const filename = `public/memories/${Date.now()}-${memory.userId}${memory.mediaType === 'image' ? '.jpg' : '.mp4'}`;
         
+        console.log('Starting S3 upload with filename:', filename);
         const uploadResult = await uploadData({
           data: file,
           key: filename
         }).result;
+        console.log('Upload result:', uploadResult);
 
         if (uploadResult?.key) {
           const urlResult = await getUrl({
             key: uploadResult.key
           });
           memory.mediaUrl = urlResult.url.toString();
+          console.log('Got signed URL:', memory.mediaUrl);
         } else {
           throw new Error('Upload failed - no key returned');
         }
