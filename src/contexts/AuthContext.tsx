@@ -31,14 +31,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const userData = await getCurrentUser();
       const attributes = await fetchUserAttributes();
       
+      if (!attributes.email) {
+        throw new Error('Email is required');
+      }
+
       setUser({
         id: userData.userId,
         name: attributes.name || 'Anonymous',
-        email: attributes.email || '',
+        email: attributes.email,
         emailVerified: attributes.email_verified === 'true'
       });
     } catch (err) {
-      console.error('Error checking user:', err);
+      if (err instanceof AuthError) {
+        console.error('Auth error checking user:', err.message);
+      } else {
+        console.error('Error checking user:', err);
+      }
       setUser(null);
     } finally {
       setIsLoading(false);
@@ -48,22 +56,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = async (email: string, password: string) => {
     try {
       setError(null);
-      const { nextStep } = await signIn({ username: email, password });
+      const { isSignedIn, nextStep } = await signIn({ username: email, password });
       
-      if (!nextStep) {
-        throw new Error('No authentication step returned');
+      if (!isSignedIn && nextStep?.signInStep === 'CONFIRM_SIGN_UP') {
+        setError('Please verify your email first');
+        throw new Error('Email verification required');
       }
-      
-      switch (nextStep.signInStep) {
-        case 'DONE':
-          await checkUser();
-          break;
-        case 'CONFIRM_SIGN_UP':
-          setError('Please verify your email first');
-          throw new Error('Email verification required');
-        default:
-          setError(`Authentication requires ${nextStep.signInStep}`);
-          throw new Error(`Unexpected auth step: ${nextStep.signInStep}`);
+
+      if (isSignedIn) {
+        await checkUser();
+      } else {
+        throw new Error('Sign in failed');
       }
     } catch (err) {
       console.error('Login error:', err);
@@ -80,93 +83,57 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       setError(null);
       
-      // Validate email
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(email)) {
-        setError('Please enter a valid email address');
+      // Input validation
+      if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+        setError('Invalid email format');
         throw new Error('Invalid email format');
       }
-      
-      // Validate password strength
+
       if (password.length < 8) {
-        setError('Password must be at least 8 characters long');
+        setError('Password must be at least 8 characters');
         throw new Error('Password too short');
       }
-      if (!/[A-Z]/.test(password)) {
-        setError('Password must contain at least one uppercase letter');
-        throw new Error('Password requires uppercase');
-      }
-      if (!/[a-z]/.test(password)) {
-        setError('Password must contain at least one lowercase letter');
-        throw new Error('Password requires lowercase');
-      }
-      if (!/[0-9]/.test(password)) {
-        setError('Password must contain at least one number');
-        throw new Error('Password requires number');
-      }
-      if (!/[^A-Za-z0-9]/.test(password)) {
-        setError('Password must contain at least one special character');
-        throw new Error('Password requires special character');
-      }
-      
-      // Validate and format name field
+
       const trimmedName = name.trim();
-      if (!trimmedName) {
-        setError('Name is required');
-        throw new Error('Name is required');
-      }
-      
-      // Ensure proper name format (at least one character, allow spaces and hyphens)
-      const nameRegex = /^[A-Za-z\s-]+$/;
-      if (!nameRegex.test(trimmedName)) {
+      if (!trimmedName || !trimmedName.match(/^[A-Za-z\s-]+$/)) {
         setError('Name can only contain letters, spaces, and hyphens');
         throw new Error('Invalid name format');
       }
-      
-      // Proper case handling (capitalize first letter of each word)
+
       const formattedName = trimmedName
         .split(' ')
         .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
         .join(' ');
 
-      try {
-        const { isSignUpComplete, nextStep } = await signUp({
-          username: email,
-          password,
-          options: {
-            userAttributes: {
-              email,
-              name: formattedName
-            },
-            autoSignIn: true
-          }
-        });
-
-        if (nextStep?.signUpStep === 'CONFIRM_SIGN_UP') {
-          return { requiresVerification: true };
+      const { isSignUpComplete, nextStep } = await signUp({
+        username: email,
+        password,
+        options: {
+          userAttributes: {
+            email,
+            name: formattedName
+          },
+          autoSignIn: false
         }
+      });
 
-        if (isSignUpComplete) {
-          await login(email, password);
-          return { requiresVerification: false };
-        }
-
-        throw new Error('Unexpected signup response');
-      } catch (signUpError) {
-        console.error('SignUp error:', signUpError);
-        if (signUpError instanceof AuthError) {
-          setError(signUpError.message);
-        } else {
-          setError('Failed to register account');
-        }
-        throw signUpError;
+      if (nextStep?.signUpStep === 'CONFIRM_SIGN_UP') {
+        return { requiresVerification: true };
       }
+
+      if (isSignUpComplete) {
+        return { requiresVerification: false };
+      }
+
+      throw new Error('Unexpected signup response');
     } catch (err) {
       console.error('Registration error:', err);
       if (err instanceof AuthError) {
         setError(err.message);
+      } else if (err instanceof Error) {
+        setError(err.message);
       } else {
-        setError(typeof err === 'string' ? err : 'Failed to register');
+        setError('Failed to register');
       }
       throw err;
     }
@@ -176,11 +143,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       setError(null);
       await confirmSignUp({ username: email, confirmationCode: code });
-      // After verification, attempt to sign in if autoSignIn is enabled
+      
       try {
-        await checkUser();
-      } catch (signInErr) {
-        console.log('Auto sign-in after verification failed, manual login required');
+        await login(email, ''); // This will fail but trigger a password prompt
+      } catch {
+        // Expected to fail, user needs to login manually
       }
     } catch (err) {
       console.error('Verification error:', err);

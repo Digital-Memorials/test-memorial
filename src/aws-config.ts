@@ -4,8 +4,8 @@ import { Amplify } from 'aws-amplify';
 const requiredEnvVars = {
   userPoolId: process.env.REACT_APP_USER_POOL_ID ?? '',
   userPoolClientId: process.env.REACT_APP_USER_POOL_CLIENT_ID ?? '',
-  bucket: process.env.REACT_APP_S3_BUCKET ?? '',
   region: process.env.REACT_APP_REGION ?? '',
+  bucket: process.env.REACT_APP_S3_BUCKET ?? '',
   apiEndpoint: process.env.REACT_APP_API_ENDPOINT ?? ''
 } as const;
 
@@ -15,6 +15,16 @@ Object.entries(requiredEnvVars).forEach(([key, value]) => {
     throw new Error(`Missing required environment variable: ${key}`);
   }
 });
+
+// Ensure region is valid
+if (!requiredEnvVars.region.match(/^[a-z]{2}-[a-z]+-\d{1}$/)) {
+  throw new Error('Invalid AWS region format');
+}
+
+// Ensure User Pool ID matches region
+if (!requiredEnvVars.userPoolId.startsWith(requiredEnvVars.region)) {
+  throw new Error('User Pool ID region does not match configured region');
+}
 
 Amplify.configure({
   Auth: {
@@ -38,7 +48,7 @@ Amplify.configure({
     REST: {
       memorialAPI: {
         endpoint: requiredEnvVars.apiEndpoint,
-        region: requiredEnvVars.region,
+        region: requiredEnvVars.region
       }
     }
   }
