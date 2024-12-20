@@ -1,6 +1,6 @@
 import { get, post, del } from '@aws-amplify/api';
 import { uploadData, getUrl } from 'aws-amplify/storage';
-import { getCurrentUser } from 'aws-amplify/auth';
+import { getCurrentUser, fetchAuthSession } from 'aws-amplify/auth';
 import { Condolence } from '../types';
 
 // Types
@@ -131,33 +131,27 @@ export const addMemory = async (memory: Omit<Memory, 'id'>): Promise<{ data: Mem
     // If there's media, upload to S3 first
     if (memory.mediaType !== 'none' && memory.mediaUrl) {
       try {
-        // Verify auth state before upload
-        const user = await getCurrentUser();
-        if (!user) {
-          throw new Error('User must be authenticated to upload media');
+        // Check authentication before any S3 operations
+        const authSession = await fetchAuthSession();
+        if (!authSession.tokens) {
+          throw new Error('Authentication required for media uploads');
         }
         
         const file = await fetch(memory.mediaUrl).then(r => r.blob());
         const filename = `public/memories/${Date.now()}-${memory.userId}${memory.mediaType === 'image' ? '.jpg' : '.mp4'}`;
         
         console.log('Starting S3 upload with filename:', filename);
-        console.log('Current user:', user);
+        console.log('Auth session:', authSession.tokens ? 'Valid' : 'Invalid');
 
         const uploadResult = await uploadData({
           data: file,
-          key: filename,
-          options: {
-            bucket: process.env.REACT_APP_S3_BUCKET
-          }
+          key: filename
         }).result;
         console.log('Upload result:', uploadResult);
 
         if (uploadResult?.key) {
           const urlResult = await getUrl({
-            key: uploadResult.key,
-            options: {
-              bucket: process.env.REACT_APP_S3_BUCKET
-            }
+            key: uploadResult.key
           });
           memory.mediaUrl = urlResult.url.toString();
           console.log('Got signed URL:', memory.mediaUrl);
@@ -167,12 +161,16 @@ export const addMemory = async (memory: Omit<Memory, 'id'>): Promise<{ data: Mem
       } catch (uploadError) {
         console.error('Error uploading to S3:', uploadError);
         if (uploadError instanceof Error) {
+          if (uploadError.message.includes('Authentication required')) {
+            throw new Error('Please sign in to upload media');
+          }
           throw new Error(`Failed to upload media: ${uploadError.message}`);
         }
         throw new Error('Failed to upload media');
       }
     }
 
+    // Proceed with memory creation (works for both text-only and media memories)
     const response = await post({
       apiName: 'memorialAPI',
       path: '/api/memories',
