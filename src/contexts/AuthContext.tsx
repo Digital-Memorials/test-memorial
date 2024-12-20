@@ -21,13 +21,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isSessionLoaded, setIsSessionLoaded] = useState(false);
 
+  // Initial session check
   useEffect(() => {
-    checkUser();
+    checkSession();
   }, []);
 
-  async function checkUser() {
+  // Session persistence check
+  const checkSession = async () => {
     try {
+      setIsLoading(true);
       const userData = await getCurrentUser();
       const attributes = await fetchUserAttributes();
       
@@ -43,15 +47,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
     } catch (err) {
       if (err instanceof AuthError) {
-        console.error('Auth error checking user:', err.message);
+        console.error('Auth error checking session:', err.message);
       } else {
-        console.error('Error checking user:', err);
+        console.error('Error checking session:', err);
       }
       setUser(null);
     } finally {
       setIsLoading(false);
+      setIsSessionLoaded(true);
     }
-  }
+  };
+
+  // Periodic session check (every 30 minutes)
+  useEffect(() => {
+    const interval = setInterval(checkSession, 30 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   const login = async (email: string, password: string) => {
     try {
@@ -60,11 +71,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       if (!isSignedIn && nextStep?.signInStep === 'CONFIRM_SIGN_UP') {
         setError('Please verify your email first');
-        throw new Error('Email verification required');
+        throw new Error('CONFIRM_SIGN_UP');
       }
 
       if (isSignedIn) {
-        await checkUser();
+        await checkSession(); // Use checkSession instead of checkUser
       } else {
         throw new Error('Sign in failed');
       }
@@ -72,10 +83,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.error('Login error:', err);
       if (err instanceof AuthError) {
         setError(err.message);
+        throw err;
+      } else if (err instanceof Error && err.message === 'CONFIRM_SIGN_UP') {
+        throw err;
       } else {
         setError('Failed to sign in');
+        throw new Error('Failed to sign in');
       }
-      throw err;
     }
   };
 
@@ -112,20 +126,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           userAttributes: {
             email,
             name: formattedName
-          },
-          autoSignIn: false
+          }
         }
       });
 
-      if (nextStep?.signUpStep === 'CONFIRM_SIGN_UP') {
-        return { requiresVerification: true };
-      }
-
-      if (isSignUpComplete) {
-        return { requiresVerification: false };
-      }
-
-      throw new Error('Unexpected signup response');
+      // Always return requiresVerification true after signup
+      return { requiresVerification: true };
     } catch (err) {
       console.error('Registration error:', err);
       if (err instanceof AuthError) {
@@ -143,12 +149,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       setError(null);
       await confirmSignUp({ username: email, confirmationCode: code });
-      
-      try {
-        await login(email, ''); // This will fail but trigger a password prompt
-      } catch {
-        // Expected to fail, user needs to login manually
-      }
     } catch (err) {
       console.error('Verification error:', err);
       if (err instanceof AuthError) {
@@ -199,6 +199,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setError(null);
       await signOut({ global: true });
       setUser(null);
+      // Force a session check after logout
+      await checkSession();
     } catch (err) {
       console.error('Logout error:', err);
       if (err instanceof AuthError) {
@@ -209,6 +211,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       throw err;
     }
   };
+
+  // Don't render children until initial session check is complete
+  if (!isSessionLoaded) {
+    return null; // Or a loading spinner
+  }
 
   const value = {
     user,
