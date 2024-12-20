@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { signIn, signUp, signOut, getCurrentUser, fetchUserAttributes } from '@aws-amplify/auth';
-import type { SignInOutput } from '@aws-amplify/auth';
+import { signIn, signUp, signOut, getCurrentUser, fetchUserAttributes } from 'aws-amplify/auth';
+import { AuthError } from 'aws-amplify/auth';
 
 interface User {
   id: string;
@@ -53,13 +53,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = async (email: string, password: string) => {
     try {
       setError(null);
-      const { isSignedIn } = await signIn({ username: email, password }) as SignInOutput;
+      const { isSignedIn } = await signIn({ username: email, password });
       if (isSignedIn) {
         await checkUser();
       }
     } catch (err) {
       console.error('Login error:', err);
-      setError(err instanceof Error ? err.message : 'Failed to sign in');
+      if (err instanceof AuthError) {
+        setError(err.message);
+      } else {
+        setError('Failed to sign in');
+      }
       throw err;
     }
   };
@@ -67,7 +71,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const register = async (email: string, password: string, name: string) => {
     try {
       setError(null);
-      await signUp({
+      const { isSignUpComplete } = await signUp({
         username: email,
         password,
         options: {
@@ -77,16 +81,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           }
         }
       });
-      
-      try {
-        await login(email, password);
-      } catch (loginErr) {
-        console.error('Auto-login after registration failed:', loginErr);
-        throw new Error('Registration successful, but login failed. Please try logging in manually.');
+
+      if (isSignUpComplete) {
+        try {
+          await login(email, password);
+        } catch (loginErr) {
+          console.error('Auto-login after registration failed:', loginErr);
+          throw new Error('Registration successful, but login failed. Please try logging in manually.');
+        }
       }
     } catch (err) {
       console.error('Registration error:', err);
-      setError(err instanceof Error ? err.message : 'Failed to register');
+      if (err instanceof AuthError) {
+        setError(err.message);
+      } else {
+        setError('Failed to register');
+      }
       throw err;
     }
   };
@@ -97,7 +107,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(null);
     } catch (err) {
       console.error('Logout error:', err);
-      setError(err instanceof Error ? err.message : 'Failed to sign out');
+      if (err instanceof AuthError) {
+        setError(err.message);
+      } else {
+        setError('Failed to sign out');
+      }
       throw err;
     }
   };
