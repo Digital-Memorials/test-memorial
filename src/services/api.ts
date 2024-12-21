@@ -156,10 +156,16 @@ export const addMemory = async (memory: Omit<Memory, 'id'>): Promise<{ data: Mem
 
           if (uploadResult?.path) {
             const urlResult = await getUrl({
-              key: uploadResult.path
+              key: uploadResult.path,
+              options: {
+                validateObjectExistence: true,
+                expiresIn: 315360000 // 1 year in seconds
+              }
             });
-            memory.mediaUrl = urlResult.url.toString();
-            console.log('Got signed URL:', memory.mediaUrl);
+            // Remove any query parameters to get the permanent URL
+            const url = new URL(urlResult.url.toString());
+            memory.mediaUrl = `${url.origin}${url.pathname}`;
+            console.log('Got permanent URL:', memory.mediaUrl);
           } else {
             throw new Error('Upload failed - no key returned');
           }
