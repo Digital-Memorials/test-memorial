@@ -138,7 +138,7 @@ export const addMemory = async (memory: Omit<Memory, 'id'>): Promise<{ data: Mem
         }
         
         const file = await fetch(memory.mediaUrl).then(r => r.blob());
-        const filename = `memories/${Date.now()}-${memory.userId}${memory.mediaType === 'image' ? '.jpg' : '.mp4'}`;
+        const filename = `public/memories/${Date.now()}-${memory.userId}${memory.mediaType === 'image' ? '.jpg' : '.mp4'}`;
         
         console.log('Starting S3 upload with filename:', filename);
         console.log('Auth session:', authSession.tokens ? 'Valid' : 'Invalid');
