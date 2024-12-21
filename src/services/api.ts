@@ -138,7 +138,7 @@ export const addMemory = async (memory: Omit<Memory, 'id'>): Promise<{ data: Mem
         }
         
         const file = await fetch(memory.mediaUrl).then(r => r.blob());
-        const filename = `public/memories/${Date.now()}-${memory.userId}${memory.mediaType === 'image' ? '.jpg' : '.mp4'}`;
+        const filename = `memories/${Date.now()}-${memory.userId}${memory.mediaType === 'image' ? '.jpg' : '.mp4'}`;
         
         console.log('Starting S3 upload with filename:', filename);
         console.log('Auth session:', authSession.tokens ? 'Valid' : 'Invalid');
@@ -156,9 +156,10 @@ export const addMemory = async (memory: Omit<Memory, 'id'>): Promise<{ data: Mem
 
           if (uploadResult?.path) {
             const urlResult = await getUrl({
-              key: uploadResult.path
+              key: `public/${uploadResult.path}`
             });
-            memory.mediaUrl = urlResult.url.toString();
+            const url = new URL(urlResult.url.toString());
+            memory.mediaUrl = `${url.origin}${url.pathname}`;
             console.log('Got URL:', memory.mediaUrl);
           } else {
             throw new Error('Upload failed - no key returned');
