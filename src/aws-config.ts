@@ -6,7 +6,8 @@ const requiredEnvVars = {
   userPoolClientId: process.env.REACT_APP_USER_POOL_CLIENT_ID ?? '',
   region: process.env.REACT_APP_REGION ?? '',
   bucket: process.env.REACT_APP_S3_BUCKET ?? '',
-  apiEndpoint: process.env.REACT_APP_API_ENDPOINT ?? ''
+  apiEndpoint: process.env.REACT_APP_API_ENDPOINT ?? '',
+  identityPoolId: 'eu-west-1:c4ef7bb9-9276-4d32-9037-ed19a9bddcee' // From aws-exports.js
 } as const;
 
 // Validate environment variables
@@ -31,6 +32,7 @@ Amplify.configure({
     Cognito: {
       userPoolId: requiredEnvVars.userPoolId,
       userPoolClientId: requiredEnvVars.userPoolClientId,
+      identityPoolId: requiredEnvVars.identityPoolId,
       loginWith: {
         email: true,
         phone: false,

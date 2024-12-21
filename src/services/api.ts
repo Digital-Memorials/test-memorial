@@ -143,28 +143,37 @@ export const addMemory = async (memory: Omit<Memory, 'id'>): Promise<{ data: Mem
         console.log('Starting S3 upload with filename:', filename);
         console.log('Auth session:', authSession.tokens ? 'Valid' : 'Invalid');
 
-        const uploadResult = await uploadData({
-          data: file,
-          key: filename
-        }).result;
-        console.log('Upload result:', uploadResult);
+        try {
+          const uploadResult = await uploadData({
+            data: file,
+            path: filename,
+            options: {
+              contentType: memory.mediaType === 'image' ? 'image/jpeg' : 'video/mp4'
+            }
+          }).result;
 
-        if (uploadResult?.key) {
-          const urlResult = await getUrl({
-            key: uploadResult.key
-          });
-          memory.mediaUrl = urlResult.url.toString();
-          console.log('Got signed URL:', memory.mediaUrl);
-        } else {
-          throw new Error('Upload failed - no key returned');
+          console.log('Upload result:', uploadResult);
+
+          if (uploadResult?.path) {
+            const urlResult = await getUrl({
+              key: uploadResult.path
+            });
+            memory.mediaUrl = urlResult.url.toString();
+            console.log('Got signed URL:', memory.mediaUrl);
+          } else {
+            throw new Error('Upload failed - no key returned');
+          }
+        } catch (uploadError) {
+          console.error('S3 upload error:', uploadError);
+          throw new Error('Failed to upload to S3: ' + (uploadError instanceof Error ? uploadError.message : 'Unknown error'));
         }
-      } catch (uploadError) {
-        console.error('Error uploading to S3:', uploadError);
-        if (uploadError instanceof Error) {
-          if (uploadError.message.includes('Authentication required')) {
+      } catch (authError) {
+        console.error('Auth error during upload:', authError);
+        if (authError instanceof Error) {
+          if (authError.message.includes('Authentication required')) {
             throw new Error('Please sign in to upload media');
           }
-          throw new Error(`Failed to upload media: ${uploadError.message}`);
+          throw new Error(`Failed to upload media: ${authError.message}`);
         }
         throw new Error('Failed to upload media');
       }
