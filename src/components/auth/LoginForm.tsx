@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { resendSignUpCode } from 'aws-amplify/auth';
+import { AuthError } from '@aws-amplify/auth';
 
 interface LoginFormProps {
   onSuccess?: () => void;
@@ -19,14 +20,19 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setVerificationError(null);
     try {
       await login(email, password);
       onSuccess?.();
     } catch (err) {
       console.error('Login error:', err);
-      if (err instanceof Error && err.message.includes('User is not confirmed')) {
+      if (err instanceof AuthError && err.name === 'UserNotConfirmedException') {
         setShowVerification(true);
         setVerificationError('Please verify your email address to continue');
+      } else if (err instanceof Error) {
+        setVerificationError(err.message);
+      } else {
+        setVerificationError('Failed to sign in');
       }
     } finally {
       setIsLoading(false);

@@ -1,17 +1,19 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { resendSignUpCode } from 'aws-amplify/auth';
+import { useNavigate } from 'react-router-dom';
 
 interface RegisterFormProps {
   onSuccess?: () => void;
 }
 
 export function RegisterForm({ onSuccess }: RegisterFormProps) {
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [verificationCode, setVerificationCode] = useState('');
-  const { register, verifyEmail, login, error } = useAuth();
+  const { register, verifyEmail, error } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [showVerification, setShowVerification] = useState(false);
   const [verificationError, setVerificationError] = useState<string | null>(null);
@@ -40,16 +42,11 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
     setVerificationError(null);
     try {
       await verifyEmail(email, verificationCode);
-      // Only after verification is confirmed, attempt login
-      try {
-        await login(email, password);
-        onSuccess?.();
-      } catch (loginErr) {
-        console.error('Login error after verification:', loginErr);
-        setVerificationError('Verification successful. Please proceed to login.');
-        // Redirect to login page instead of auto-login
-        window.location.href = '/login';
-      }
+      // After successful verification, redirect to login
+      setVerificationError('Email verified successfully! Please log in.');
+      setTimeout(() => {
+        navigate('/login');
+      }, 2000);
     } catch (err) {
       console.error('Verification error:', err);
       setVerificationError(
@@ -66,6 +63,7 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
     try {
       setResendLoading(true);
       await resendSignUpCode({ username: email });
+      setVerificationError('Verification code resent successfully!');
       // Start cooldown timer
       setResendCooldown(60);
       const timer = setInterval(() => {

@@ -71,7 +71,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       if (!isSignedIn) {
         if (nextStep?.signInStep === 'CONFIRM_SIGN_UP') {
-          throw new Error('User is not confirmed');
+          throw new AuthError({
+            name: 'UserNotConfirmedException',
+            message: 'User is not confirmed'
+          });
         }
         throw new Error('Sign in failed');
       }
@@ -82,22 +85,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       if (attributes.email_verified !== 'true') {
         await signOut();
-        throw new Error('User is not confirmed');
+        throw new AuthError({
+          name: 'UserNotConfirmedException',
+          message: 'User is not confirmed'
+        });
       }
 
       await checkSession();
     } catch (err) {
       console.error('Login error:', err);
       if (err instanceof AuthError) {
+        if (err.name === 'UserNotConfirmedException') {
+          throw err; // Re-throw UserNotConfirmedException to trigger verification UI
+        }
         setError(err.message);
-        throw err;
       } else if (err instanceof Error) {
         setError(err.message);
-        throw err;
       } else {
         setError('Failed to sign in');
-        throw new Error('Failed to sign in');
       }
+      throw err;
     }
   };
 
@@ -127,7 +134,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
         .join(' ');
 
-      const { isSignUpComplete, nextStep } = await signUp({
+      await signUp({
         username: email,
         password,
         options: {
@@ -138,7 +145,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       });
 
-      // Always return requiresVerification true after signup
       return { requiresVerification: true };
     } catch (err) {
       console.error('Registration error:', err);
