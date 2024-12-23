@@ -6,6 +6,27 @@
       "lambdaFunction": "memorialFunction",
       "permissions": {
         "setting": "open"
+      },
+      "cors": {
+        "origin": "*",
+        "headers": [
+          "Content-Type",
+          "X-Amz-Date",
+          "Authorization",
+          "X-Api-Key",
+          "X-Amz-Security-Token",
+          "X-Requested-With",
+          "Accept"
+        ],
+        "methods": [
+          "DELETE",
+          "GET",
+          "HEAD",
+          "OPTIONS",
+          "PATCH",
+          "POST",
+          "PUT"
+        ]
       }
     },
     "/api/condolences": {
@@ -13,6 +34,27 @@
       "lambdaFunction": "memorialFunction",
       "permissions": {
         "setting": "open"
+      },
+      "cors": {
+        "origin": "*",
+        "headers": [
+          "Content-Type",
+          "X-Amz-Date",
+          "Authorization",
+          "X-Api-Key",
+          "X-Amz-Security-Token",
+          "X-Requested-With",
+          "Accept"
+        ],
+        "methods": [
+          "DELETE",
+          "GET",
+          "HEAD",
+          "OPTIONS",
+          "PATCH",
+          "POST",
+          "PUT"
+        ]
       }
     }
   }

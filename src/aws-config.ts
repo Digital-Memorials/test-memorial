@@ -7,7 +7,7 @@ const requiredEnvVars = {
   region: process.env.REACT_APP_REGION ?? '',
   bucket: process.env.REACT_APP_S3_BUCKET ?? '',
   apiEndpoint: process.env.REACT_APP_API_ENDPOINT ?? '',
-  identityPoolId: 'eu-west-1:c4ef7bb9-9276-4d32-9037-ed19a9bddcee' // From aws-exports.js
+  identityPoolId: 'eu-west-1:c4ef7bb9-9276-4d32-9037-ed19a9bddcee'
 } as const;
 
 // Validate environment variables

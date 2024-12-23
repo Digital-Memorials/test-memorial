@@ -24,16 +24,11 @@ const MainLayout: React.FC = () => {
     { id: 'obituary', label: 'Life Story' },
     { id: 'gallery', label: 'Gallery' },
     { id: 'timeline', label: 'Timeline' },
-    { id: 'memory-wall', label: 'Memories', requiresAuth: true }
+    { id: 'memory-wall', label: 'Memories' }
   ];
 
   const handleTabClick = (tabId: string) => {
-    const tab = tabs.find(t => t.id === tabId);
-    if (tab?.requiresAuth && !user) {
-      navigate('/login');
-    } else {
-      setActiveTab(tabId);
-    }
+    setActiveTab(tabId);
   };
 
   const renderContent = () => {
@@ -68,7 +63,7 @@ const MainLayout: React.FC = () => {
             <div className="absolute top-4 right-4 md:top-6 md:right-6 z-10">
               <div className="flex items-center gap-2 md:gap-3 px-3 py-1.5 md:px-4 md:py-2 bg-charcoal-900/80 backdrop-blur-sm rounded-lg border border-cream-200/10 shadow-elegant">
                 <span className="text-xs md:text-sm text-cream-50/80 font-serif truncate max-w-[100px] md:max-w-none">
-                  {user.email}
+                  {user.name}
                 </span>
                 <div className="h-3 md:h-4 w-px bg-cream-200/20"></div>
                 <button

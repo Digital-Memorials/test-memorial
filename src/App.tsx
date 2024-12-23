@@ -4,7 +4,6 @@ import { AuthProvider } from './contexts/AuthContext';
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
 import MainLayout from './components/MainLayout';
-import RequireAuth from './components/auth/RequireAuth';
 import './aws-config';
 
 function App() {
@@ -14,14 +13,7 @@ function App() {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route
-            path="/"
-            element={
-              <RequireAuth>
-                <MainLayout />
-              </RequireAuth>
-            }
-          />
+          <Route path="/" element={<MainLayout />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </AuthProvider>

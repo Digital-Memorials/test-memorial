@@ -75,7 +75,7 @@ export const getMemories = async (): Promise<{ data: Memory[] }> => {
     console.log('Raw memories response:', response);
 
     // Handle Amplify response format
-    let jsonData: { success: boolean; data: any[] };
+    let jsonData: any;
     
     if (response?.response instanceof Promise) {
       const resolvedResponse = await response.response;
@@ -112,12 +112,11 @@ export const getMemories = async (): Promise<{ data: Memory[] }> => {
 
     console.log('Parsed memories data:', jsonData);
 
-    if (jsonData.success && Array.isArray(jsonData.data)) {
-      return { data: jsonData.data.filter(isMemory) };
-    }
-
-    console.error('Invalid response format:', jsonData);
-    return { data: [] };
+    // Handle both array and object response formats
+    const items = Array.isArray(jsonData) ? jsonData : (jsonData?.data || []);
+    const validMemories = items.filter(isMemory);
+    
+    return { data: validMemories };
   } catch (error) {
     console.error('Error in getMemories:', error);
     return { data: [] };
@@ -266,18 +265,15 @@ export const getCondolences = async (): Promise<{ data: Condolence[] }> => {
       options: {
         headers: {
           'Accept': 'application/json'
-        }
+        },
+        withCredentials: false
       }
     }) as AmplifyResponse;
 
-    console.log('Raw condolences response:', response);
-
-    // Handle Amplify response format
-    let jsonData: { success: boolean; data: any[] };
+    let jsonData: any;
     
     if (response?.response instanceof Promise) {
       const resolvedResponse = await response.response;
-      console.log('Resolved response:', resolvedResponse);
       if (resolvedResponse?.body) {
         if (resolvedResponse.body instanceof ReadableStream) {
           const reader = resolvedResponse.body.getReader();
@@ -297,34 +293,26 @@ export const getCondolences = async (): Promise<{ data: Condolence[] }> => {
             ? JSON.parse(resolvedResponse.body) 
             : resolvedResponse.body;
         }
-      } else {
-        throw new Error('No response body received');
       }
     } else if (response?.body) {
       jsonData = typeof response.body === 'string' 
         ? JSON.parse(response.body) 
         : response.body;
-    } else {
-      throw new Error('Invalid response format');
     }
 
-    console.log('Parsed condolences data:', jsonData);
-
-    if (jsonData.success && Array.isArray(jsonData.data)) {
-      return { data: jsonData.data.filter(isCondolence) };
-    }
-
-    console.error('Invalid response format:', jsonData);
-    return { data: [] };
+    // Handle both array and object response formats
+    const items = Array.isArray(jsonData) ? jsonData : (jsonData?.data || []);
+    const validCondolences = items.filter(isCondolence);
+    
+    return { data: validCondolences };
   } catch (error) {
     console.error('Error in getCondolences:', error);
-    return { data: [] };
+    throw error;
   }
 };
 
 export const addCondolence = async (condolence: Omit<Condolence, 'id'>): Promise<{ data: Condolence }> => {
   try {
-    console.log('Sending condolence data:', condolence);
     const response = await post({
       apiName: 'memorialAPI',
       path: '/api/condolences',
@@ -333,18 +321,15 @@ export const addCondolence = async (condolence: Omit<Condolence, 'id'>): Promise
           'Content-Type': 'application/json',
           'Accept': 'application/json'
         },
+        withCredentials: false,
         body: condolence
       }
     }) as AmplifyResponse;
 
-    console.log('Raw response:', response);
-
-    // Handle Amplify response format
     let jsonData: CondolenceResponse;
     
     if (response?.response instanceof Promise) {
       const resolvedResponse = await response.response;
-      console.log('Resolved response:', resolvedResponse);
       if (resolvedResponse?.body) {
         if (resolvedResponse.body instanceof ReadableStream) {
           const reader = resolvedResponse.body.getReader();
@@ -375,10 +360,7 @@ export const addCondolence = async (condolence: Omit<Condolence, 'id'>): Promise
       throw new Error('Invalid response format');
     }
 
-    console.log('Parsed response data:', jsonData);
-
     if (jsonData.success && isCondolence(jsonData.data)) {
-      console.log('Valid condolence');
       return { data: jsonData.data };
     }
 
@@ -391,8 +373,18 @@ export const addCondolence = async (condolence: Omit<Condolence, 'id'>): Promise
 
 export const deleteCondolence = async (id: string): Promise<void> => {
   try {
-    await del({ apiName: 'memorialAPI', path: `/api/condolences/${id}` });
+    await del({
+      apiName: 'memorialAPI',
+      path: `/api/condolences/${id}`,
+      options: {
+        headers: {
+          'Accept': 'application/json'
+        },
+        withCredentials: false
+      }
+    });
   } catch (error) {
-    throw new Error('Failed to delete condolence');
+    console.error('Error in deleteCondolence:', error);
+    throw error;
   }
 }; 

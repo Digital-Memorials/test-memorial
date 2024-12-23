@@ -1,29 +1,72 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { addCondolence, getCondolences } from '../services/api';
+import { addCondolence, getCondolences, deleteCondolence } from '../services/api';
 import { Condolence } from '../types/index';
 import styled from 'styled-components';
+import { Link, useLocation } from 'react-router-dom';
 
 const BookContainer = styled.div`
   display: flex;
   max-width: calc(100vw - 2rem);
-  margin: 0 auto;
+  margin: 3rem auto;
   min-height: 800px;
   position: relative;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  background: linear-gradient(to right, #F5F1EA, #FFF);
+  box-shadow: 
+    0 4px 40px -15px rgba(50, 50, 93, 0.05),
+    0 2px 10px -3px rgba(0, 0, 0, 0.05),
+    0 -10px 20px -8px rgba(0, 0, 0, 0.08),
+    0 10px 20px -8px rgba(0, 0, 0, 0.08);
+  background: linear-gradient(to right, #F8F5F0, #FFF);
+  border-radius: 12px;
+  overflow: hidden;
+  transform: perspective(2000px) rotateX(1deg);
+  transform-origin: center center;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 40px;
+    background: linear-gradient(to bottom, 
+      rgba(0, 0, 0, 0.04) 0%,
+      rgba(0, 0, 0, 0.02) 40%,
+      transparent 100%
+    );
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 40px;
+    background: linear-gradient(to top, 
+      rgba(0, 0, 0, 0.04) 0%,
+      rgba(0, 0, 0, 0.02) 40%,
+      transparent 100%
+    );
+    pointer-events: none;
+    z-index: 1;
+  }
 `;
 
 const BookSpine = styled.div`
   width: 48px;
-  background-color: #D4C4B4;
+  background-color: #E5DCD0;
   position: relative;
+  transform: perspective(2000px) rotateY(-12deg);
+  transform-origin: right center;
   
   &::before {
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(to right, rgba(139, 107, 77, 0.4), transparent);
+    background: linear-gradient(to right, rgba(139, 107, 77, 0.2), transparent);
   }
 
   &::after {
@@ -39,9 +82,11 @@ const BookSpine = styled.div`
 
 const BookEdge = styled.div`
   width: 48px;
-  background-color: #F5F1EA;
+  background-color: #F8F5F0;
   position: relative;
   overflow: hidden;
+  transform: perspective(2000px) rotateY(12deg);
+  transform-origin: left center;
 
   /* Base gradient for depth */
   &::before {
@@ -60,8 +105,8 @@ const BookEdge = styled.div`
       to right,
       transparent,
       transparent 1px,
-      rgba(0, 0, 0, 0.05) 1px,
-      rgba(0, 0, 0, 0.05) 2px
+      rgba(0, 0, 0, 0.03) 1px,
+      rgba(0, 0, 0, 0.03) 2px
     );
     background-size: 3px 100%;
   }
@@ -69,139 +114,176 @@ const BookEdge = styled.div`
 
 const MainContent = styled.div`
   flex: 1;
-  background: white;
+  background: #FFFBF6;
   position: relative;
   min-width: 0;
-  padding: 3rem 4rem;
+  padding: 6rem 3rem;
   box-shadow: 
-    inset 1px 0 2px rgba(0, 0, 0, 0.05),
-    inset -1px 0 2px rgba(0, 0, 0, 0.05);
-  
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.05), transparent);
-  }
-
-  &::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: linear-gradient(to top, rgba(0, 0, 0, 0.05), transparent);
-  }
+    inset 1px 0 1px rgba(0, 0, 0, 0.03),
+    inset -1px 0 1px rgba(0, 0, 0, 0.03);
 `;
 
 const Header = styled.div`
   text-align: center;
-  margin-bottom: 3rem;
+  margin-bottom: 4rem;
+  position: relative;
+  padding: 2rem 0;
+  
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 180px;
+    height: 1px;
+    background: linear-gradient(
+      to right,
+      transparent,
+      rgba(139, 107, 77, 0.3) 20%,
+      rgba(139, 107, 77, 0.3) 80%,
+      transparent
+    );
+  }
+
+  &::before {
+    top: 0;
+  }
+
+  &::after {
+    bottom: 0;
+  }
 `;
 
 const Title = styled.h2`
   font-family: 'Playfair Display', serif;
-  font-size: 2.5rem;
+  font-size: 3.5rem;
   color: #2D3748;
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
   font-weight: normal;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
 `;
 
 const Subtitle = styled.p`
   font-family: 'Lora', serif;
-  font-size: 1rem;
+  font-size: 1.125rem;
   color: #666;
-  line-height: 1.5;
-  max-width: 36rem;
+  line-height: 1.6;
+  max-width: 42rem;
   margin: 0 auto;
+  font-style: italic;
+`;
+
+const FormSection = styled.div`
+  max-width: 64rem;
+  margin: 0 auto;
+  padding: 0 2rem;
+`;
+
+const FormLabel = styled.label`
+  display: block;
+  font-family: 'Lora', serif;
+  font-size: 1.125rem;
+  color: #2D3748;
+  margin-bottom: 1rem;
+  font-weight: 500;
 `;
 
 const Form = styled.form`
-  max-width: 36rem;
-  margin: 0 auto 4rem;
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
-  padding: 2rem;
-  background: rgba(245, 241, 234, 0.5);
-  border-radius: 0.5rem;
-  border: 1px solid rgba(139, 107, 77, 0.1);
+  gap: 3rem;
+  width: 100%;
+`;
+
+const FormGroup = styled.div`
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+
+  &:first-of-type {
+    width: 50%;
+  }
+`;
+
+const inputStyles = `
+  width: 100%;
+  padding: 1.25rem 1.5rem;
+  border: 1px solid rgba(139, 107, 77, 0.15);
+  border-radius: 12px;
+  font-size: 1.125rem;
+  background: white;
+  color: #2D3748;
+  font-family: 'Lora', serif;
+  transition: all 0.2s ease;
+  
+  &::placeholder {
+    color: #A0AEC0;
+    font-size: 1.125rem;
+    font-style: italic;
+  }
+  
+  &:focus {
+    outline: none;
+    border-color: rgba(139, 107, 77, 0.3);
+    box-shadow: 0 0 0 3px rgba(139, 107, 77, 0.1);
+  }
 `;
 
 const Input = styled.input`
-  width: 100%;
-  padding: 0.75rem 1rem;
-  border: 1px solid #E2E8F0;
-  border-radius: 0.25rem;
-  font-size: 0.875rem;
-  background: white;
-  color: #4A5568;
-  font-family: 'Lora', serif;
-  
-  &::placeholder {
-    color: #A0AEC0;
-  }
-  
-  &:focus {
-    outline: none;
-    border-color: #8B6B4D;
-    box-shadow: 0 0 0 2px rgba(139, 107, 77, 0.1);
-  }
+  ${inputStyles}
+  height: 4rem;
 `;
 
 const TextArea = styled.textarea`
-  width: 100%;
-  padding: 0.75rem 1rem;
-  border: 1px solid #E2E8F0;
-  border-radius: 0.25rem;
-  font-size: 0.875rem;
-  min-height: 150px;
+  ${inputStyles}
+  min-height: 240px;
   resize: vertical;
-  background: white;
-  color: #4A5568;
-  font-family: 'Lora', serif;
-  line-height: 1.6;
-  
-  &::placeholder {
-    color: #A0AEC0;
-  }
-  
-  &:focus {
-    outline: none;
-    border-color: #8B6B4D;
-    box-shadow: 0 0 0 2px rgba(139, 107, 77, 0.1);
-  }
+  line-height: 1.8;
+`;
+
+const ButtonContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  margin-top: 2rem;
+  width: 100%;
 `;
 
 const Button = styled.button`
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
-  padding: 0.75rem 2rem;
+  gap: 1rem;
+  padding: 1.25rem 3rem;
   background-color: #8B6B4D;
   color: white;
   border: none;
   border-radius: 9999px;
-  font-size: 0.875rem;
-  font-family: 'Playfair Display', serif;
+  font-size: 1.125rem;
+  font-family: 'Lora', serif;
   cursor: pointer;
   transition: all 0.2s;
-  align-self: center;
+  min-width: 240px;
+  box-shadow: 
+    0 2px 4px rgba(139, 107, 77, 0.1),
+    0 0 0 1px rgba(139, 107, 77, 0.1);
   
   &:hover {
     background-color: #75593F;
+    color: white;
     transform: translateY(-1px);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: 
+      0 4px 6px rgba(139, 107, 77, 0.15),
+      0 0 0 1px rgba(139, 107, 77, 0.15);
   }
   
   &:active {
     transform: translateY(0);
-    box-shadow: none;
+    color: white;
+    box-shadow: 
+      0 2px 4px rgba(139, 107, 77, 0.1),
+      0 0 0 1px rgba(139, 107, 77, 0.1);
   }
 
   &:disabled {
@@ -209,78 +291,265 @@ const Button = styled.button`
     cursor: not-allowed;
     transform: none;
     box-shadow: none;
+    color: white;
   }
 
   svg {
-    width: 1rem;
-    height: 1rem;
-    transition: transform 0.2s;
-  }
-
-  &:hover svg {
-    transform: translateX(2px);
+    width: 1.5rem;
+    height: 1.5rem;
+    stroke-width: 2;
   }
 `;
 
 const CondolenceList = styled.div`
-  max-width: 36rem;
-  margin: 0 auto;
+  max-width: 64rem;
+  margin: 6rem auto 0;
   display: flex;
   flex-direction: column;
+  gap: 2rem;
+  padding: 0 2rem;
 `;
 
-const CondolenceEntry = styled.article`
-  padding: 1.5rem 0;
-  border-bottom: 1px solid rgba(203, 213, 224, 0.3);
-  transition: background-color 0.2s ease;
-  
-  &:last-child {
-    border-bottom: none;
+const CondolenceCard = styled.article`
+  opacity: 0;
+  animation: fadeIn 0.5s ease-out forwards;
+  animation-delay: calc(var(--index, 0) * 200ms);
+  transform: translateY(1rem);
+  transition: all 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &:hover {
+    transform: translateY(-2px);
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(1rem);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+`;
+
+const CardContent = styled.div`
+  position: relative;
+  background: rgba(253, 252, 250, 0.2);
+  backdrop-filter: blur(8px);
+  border-radius: 1rem;
+  padding: 2rem;
+  border: 1px solid rgba(235, 217, 196, 0.1);
+  box-shadow: 
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s ease;
+
+  &:hover {
+    box-shadow: 
+      0 10px 15px -3px rgba(0, 0, 0, 0.1),
+      0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  }
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 3rem;
+    height: 3rem;
+    overflow: hidden;
+    opacity: 0.3;
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 1px;
+    height: 2rem;
+    background: linear-gradient(to bottom, rgba(235, 217, 196, 0.3), transparent);
+    transform: rotate(45deg) translateX(1rem);
+  }
+`;
+
+const QuoteIcon = styled.div`
+  position: absolute;
+  top: -0.75rem;
+  left: -0.75rem;
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, #DFC2A4, #F5EDE6);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+  svg {
+    width: 1rem;
+    height: 1rem;
+    color: #8B6B4D;
+  }
+`;
+
+const CondolenceMessage = styled.div`
+  margin-bottom: 1.5rem;
+  position: relative;
+  padding-left: 1.5rem;
+  border-left: 2px solid rgba(139, 107, 77, 0.2);
+`;
+
+const MessageText = styled.blockquote`
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.125rem;
+  color: #4A4541;
+  line-height: 1.6;
+  font-style: italic;
+  margin: 0;
+`;
+
+const CardFooter = styled.footer`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 1rem;
+  margin-top: 1rem;
+  border-top: 1px solid rgba(235, 217, 196, 0.2);
+`;
+
+const AuthorDetails = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+`;
+
+const AuthorNameText = styled.cite`
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.125rem;
+  color: #332F2B;
+  font-style: normal;
+  font-weight: 600;
+`;
+
+const RelationText = styled.p`
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 0.875rem;
+  color: #8B6B4D;
+  margin: 0;
+`;
+
+const CardDeleteButton = styled.button`
+  color: #A8A29E;
+  transition: color 0.2s ease;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(5px);
+  transition: all 0.3s ease;
+
+  ${CardContent}:hover & {
+    opacity: 1;
+    transform: translateY(0);
   }
 
   &:hover {
-    background-color: rgba(245, 241, 234, 0.5);
+    color: #EF4444;
+  }
+
+  svg {
+    width: 1.25rem;
+    height: 1.25rem;
   }
 `;
 
-const Message = styled.blockquote`
+const SignInPrompt = styled.div`
+  max-width: 600px;
+  margin: 0 auto 3rem;
+  padding: 3rem;
+  background: white;
+  border-radius: 16px;
+  text-align: center;
+  box-shadow: 
+    0 4px 40px -15px rgba(50, 50, 93, 0.05),
+    0 2px 10px -3px rgba(0, 0, 0, 0.05);
+`;
+
+const PromptText = styled.p`
   font-family: 'Lora', serif;
-  font-size: 1rem;
+  font-size: 1.25rem;
   color: #4A5568;
+  margin-bottom: 2rem;
   line-height: 1.6;
-  margin: 0 0 1rem 0;
-  padding-left: 1.5rem;
-  position: relative;
-  font-style: italic;
-  
-  &::before {
-    content: '"';
-    position: absolute;
-    left: 0;
-    top: -0.25rem;
-    font-size: 2rem;
-    color: #8B6B4D;
-    font-family: 'Playfair Display', serif;
-    opacity: 0.5;
-  }
 `;
 
-const Author = styled.cite`
-  font-family: 'Lora', serif;
-  font-size: 0.875rem;
-  color: #4A5568;
-  font-style: normal;
-  display: flex;
+const SignInButton = styled(Link)`
+  display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
+  justify-content: center;
+  gap: 1rem;
+  padding: 1.25rem 3rem;
+  background-color: #8B6B4D;
+  color: white;
+  border: none;
+  border-radius: 9999px;
+  font-size: 1.125rem;
+  font-family: 'Lora', serif;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+  min-width: 240px;
+  box-shadow: 
+    0 2px 4px rgba(139, 107, 77, 0.1),
+    0 0 0 1px rgba(139, 107, 77, 0.1);
+  
+  &:hover {
+    background-color: #75593F;
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 
+      0 4px 6px rgba(139, 107, 77, 0.15),
+      0 0 0 1px rgba(139, 107, 77, 0.15);
+  }
+  
+  &:active {
+    transform: translateY(0);
+    color: white;
+    box-shadow: 
+      0 2px 4px rgba(139, 107, 77, 0.1),
+      0 0 0 1px rgba(139, 107, 77, 0.1);
+  }
+
+  svg {
+    width: 1.5rem;
+    height: 1.5rem;
+    stroke-width: 2;
+  }
 `;
 
-const Relation = styled.span`
+const ErrorMessage = styled.div`
+  text-align: center;
+  color: #E53E3E;
+  padding: 1rem 1.5rem;
+  background: rgba(229, 62, 62, 0.1);
+  border-radius: 12px;
+  margin-bottom: 2rem;
+  font-size: 1rem;
+  max-width: 42rem;
+  margin: 0 auto 2rem;
+`;
+
+const LoadingMessage = styled.div`
+  text-align: center;
+  padding: 3rem;
   color: #718096;
-  &::before {
-    content: '•';
-    margin-right: 0.5rem;
-  }
+  font-family: 'Lora', serif;
+  font-style: italic;
+  font-size: 1.125rem;
 `;
 
 const Condolences: React.FC = () => {
@@ -290,6 +559,7 @@ const Condolences: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
+  const location = useLocation();
 
   useEffect(() => {
     loadCondolences();
@@ -299,9 +569,27 @@ const Condolences: React.FC = () => {
     try {
       setIsLoading(true);
       setError(null);
-      const response = await getCondolences();
-      if (response?.data) {
-        setCondolences(response.data);
+      
+      // Add retry logic for loading condolences
+      let attempts = 0;
+      const maxAttempts = 3;
+      
+      while (attempts < maxAttempts) {
+        try {
+          const response = await getCondolences();
+          if (response?.data) {
+            const sortedCondolences = response.data.sort((a, b) => 
+              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+            );
+            setCondolences(sortedCondolences);
+            break;
+          }
+        } catch (err) {
+          attempts++;
+          if (attempts === maxAttempts) {
+            throw err;
+          }
+        }
       }
     } catch (error) {
       console.error('Error loading condolences:', error);
@@ -318,6 +606,11 @@ const Condolences: React.FC = () => {
     try {
       setIsLoading(true);
       setError(null);
+      
+      // Add retry logic for submitting condolences
+      let attempts = 0;
+      const maxAttempts = 3;
+      
       const condolenceData = {
         text: newCondolence.trim(),
         userId: user.id,
@@ -326,15 +619,41 @@ const Condolences: React.FC = () => {
         createdAt: new Date().toISOString()
       };
 
-      const response = await addCondolence(condolenceData);
-      if (response?.data) {
-        setCondolences(prev => [...prev, response.data]);
-        setNewCondolence('');
-        setRelation('');
+      while (attempts < maxAttempts) {
+        try {
+          const response = await addCondolence(condolenceData);
+          if (response?.data) {
+            setCondolences(prev => [response.data, ...prev]);
+            setNewCondolence('');
+            setRelation('');
+            await loadCondolences();
+            break;
+          }
+        } catch (err) {
+          attempts++;
+          if (attempts === maxAttempts) {
+            throw err;
+          }
+        }
       }
     } catch (error) {
       console.error('Error adding condolence:', error);
       setError('Failed to add condolence. Please try again later.');
+      await loadCondolences();
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      await deleteCondolence(id);
+      setCondolences(prev => prev.filter(c => c.id !== id));
+    } catch (error) {
+      console.error('Error deleting condolence:', error);
+      setError('Failed to delete condolence. Please try again later.');
     } finally {
       setIsLoading(false);
     }
@@ -347,55 +666,96 @@ const Condolences: React.FC = () => {
         <Header>
           <Title>Book of Condolences</Title>
           <Subtitle>
-            Share your condolences, memories, and messages of support for the family in this
+            Share your condolences and messages of support in this
             digital book of remembrance.
           </Subtitle>
         </Header>
 
-        {error && (
-          <div style={{ color: '#E53E3E', textAlign: 'center', marginBottom: '1rem' }}>
-            {error}
-          </div>
-        )}
+        {error && <ErrorMessage>{error}</ErrorMessage>}
 
-        {user && (
-          <Form onSubmit={handleSubmit}>
-            <Input
-              type="text"
-              value={relation}
-              onChange={(e) => setRelation(e.target.value)}
-              placeholder="Your relationship to John (e.g., Friend, Colleague, Family)"
-              required
-              disabled={isLoading}
-            />
-            <TextArea
-              value={newCondolence}
-              onChange={(e) => setNewCondolence(e.target.value)}
-              placeholder="Share your condolences, memories, or words of comfort..."
-              required
-              disabled={isLoading}
-            />
-            <Button type="submit" disabled={isLoading}>
-              {isLoading ? 'Signing...' : 'Sign the Book'}
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        {user ? (
+          <FormSection>
+            <Form onSubmit={handleSubmit}>
+              <FormGroup>
+                <FormLabel>Relationship</FormLabel>
+                <Input
+                  type="text"
+                  value={relation}
+                  onChange={(e) => setRelation(e.target.value)}
+                  placeholder="Friend, Family, Colleague..."
+                  required
+                  disabled={isLoading}
+                />
+              </FormGroup>
+              <FormGroup>
+                <FormLabel>Your Message</FormLabel>
+                <TextArea
+                  value={newCondolence}
+                  onChange={(e) => setNewCondolence(e.target.value)}
+                  placeholder="Share your condolences, memories, or words of comfort..."
+                  required
+                  disabled={isLoading}
+                />
+              </FormGroup>
+              <ButtonContainer>
+                <Button type="submit" disabled={isLoading}>
+                  {isLoading ? 'Signing...' : 'Sign the Book'}
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                  </svg>
+                </Button>
+              </ButtonContainer>
+            </Form>
+          </FormSection>
+        ) : (
+          <SignInPrompt>
+            <PromptText>
+              Sign in to share your condolences and messages of support with the family.
+            </PromptText>
+            <SignInButton to="/login" state={{ from: location }}>
+              Sign In to Share
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
               </svg>
-            </Button>
-          </Form>
+            </SignInButton>
+          </SignInPrompt>
         )}
 
         {isLoading && !condolences.length ? (
-          <div style={{ textAlign: 'center', padding: '2rem' }}>Loading condolences...</div>
+          <LoadingMessage>Loading messages of condolence...</LoadingMessage>
         ) : (
           <CondolenceList>
             {condolences.map((condolence, index) => (
-              <CondolenceEntry key={condolence.id || index}>
-                <Message>{condolence.text}</Message>
-                <Author>
-                  - {condolence.userName}
-                  <Relation>• {condolence.relation}</Relation>
-                </Author>
-              </CondolenceEntry>
+              <CondolenceCard key={condolence.id} style={{ '--index': index } as React.CSSProperties}>
+                <CardContent>
+                  <QuoteIcon>
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
+                    </svg>
+                  </QuoteIcon>
+                  <CondolenceMessage>
+                    <MessageText>{condolence.text}</MessageText>
+                  </CondolenceMessage>
+                  <CardFooter>
+                    <AuthorDetails>
+                      <AuthorNameText>{condolence.userName}</AuthorNameText>
+                      {condolence.relation && (
+                        <RelationText>{condolence.relation}</RelationText>
+                      )}
+                    </AuthorDetails>
+                    {user && user.id === condolence.userId && (
+                      <CardDeleteButton
+                        onClick={() => handleDelete(condolence.id)}
+                        title="Delete condolence"
+                      >
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                      </CardDeleteButton>
+                    )}
+                  </CardFooter>
+                </CardContent>
+              </CondolenceCard>
             ))}
           </CondolenceList>
         )}
