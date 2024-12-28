@@ -242,6 +242,13 @@ const Form = styled.form`
   transform: perspective(1000px) rotateX(0.5deg) translateY(-3px);
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 
+  @media (max-width: 768px) {
+    padding: 1.25rem;
+    margin: 0 1rem;
+    transform: none;
+    border-radius: 0.75rem;
+  }
+
   &:hover {
     transform: perspective(1000px) rotateX(0.5deg) translateY(-5px);
     box-shadow: 
@@ -252,6 +259,13 @@ const Form = styled.form`
       0 20.8px 33.4px rgba(0, 0, 0, 0.065),
       0 40px 80px rgba(0, 0, 0, 0.09),
       0 0 0 1px rgba(255, 255, 255, 0.15) inset;
+
+    @media (max-width: 768px) {
+      transform: none;
+      box-shadow: 
+        0 2px 4px rgba(0, 0, 0, 0.02),
+        0 4px 8px rgba(0, 0, 0, 0.02);
+    }
   }
 `;
 
@@ -288,11 +302,21 @@ const FormActions = styled.div`
   display: flex;
   gap: 1.5rem;
   align-items: center;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 1rem;
+    width: 100%;
+  }
 `;
 
 const FileInputWrapper = styled.div`
   flex: 1;
   position: relative;
+
+  @media (max-width: 768px) {
+    width: 100%;
+  }
 `;
 
 const FileInputLabel = styled.label`
@@ -312,15 +336,17 @@ const FileInputLabel = styled.label`
   position: relative;
   overflow: hidden;
 
+  @media (max-width: 768px) {
+    width: 100%;
+    justify-content: center;
+    padding: 1rem;
+  }
+
   &:hover {
     background: rgba(255, 255, 255, 0.9);
     border-color: rgba(139, 107, 77, 0.4);
     transform: translateY(-1px);
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.04);
-  }
-
-  &:active {
-    transform: translateY(0);
   }
 
   svg {
@@ -361,12 +387,16 @@ const FileName = styled.span`
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 200px;
+
+  @media (max-width: 768px) {
+    max-width: 150px;
+  }
 `;
 
 const Button = styled.button`
   padding: 1rem 2rem;
   background-color: #8B6B4D;
-  color: #FFFFFF;
+  color: white;
   border: none;
   border-radius: 0.75rem;
   cursor: pointer;
@@ -380,21 +410,11 @@ const Button = styled.button`
   position: relative;
   overflow: hidden;
 
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
+  @media (max-width: 768px) {
     width: 100%;
-    height: 100%;
-    background: linear-gradient(
-      to right,
-      transparent,
-      rgba(255, 255, 255, 0.1),
-      transparent
-    );
-    transform: translateX(-100%);
-    transition: transform 0.6s ease;
+    justify-content: center;
+    display: flex;
+    align-items: center;
   }
 
   &:hover {
@@ -404,8 +424,8 @@ const Button = styled.button`
       0 4px 8px rgba(139, 107, 77, 0.2),
       0 0 0 1px rgba(255, 255, 255, 0.2) inset;
 
-    &::before {
-      transform: translateX(100%);
+    @media (max-width: 768px) {
+      transform: translateY(-1px);
     }
   }
 
@@ -414,17 +434,6 @@ const Button = styled.button`
     box-shadow: 
       0 2px 4px rgba(139, 107, 77, 0.1),
       0 0 0 1px rgba(255, 255, 255, 0.1) inset;
-  }
-
-  &:disabled {
-    background-color: #D1C3B6;
-    cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
-
-    &::before {
-      display: none;
-    }
   }
 `;
 
@@ -710,23 +719,38 @@ const FullScreenImage = styled.div<{ isFullScreen: boolean }>`
   display: ${props => props.isFullScreen ? 'flex' : 'none'};
   align-items: center;
   justify-content: center;
+  touch-action: none; /* Prevent default touch behaviors */
 
   img {
-    max-width: 95vw;
-    max-height: 95vh;
+    max-width: 100vw;
+    max-height: 100vh;
+    width: 100%;
+    height: 100%;
     object-fit: contain;
     user-select: none;
+    
+    @media (min-width: 768px) {
+      max-width: 95vw;
+      max-height: 95vh;
+      width: auto;
+      height: auto;
+    }
   }
 
   .image-controls {
     position: fixed;
-    bottom: 2rem;
-    right: 2rem;
+    bottom: 1rem;
+    right: 1rem;
     opacity: 1;
     background: rgba(0, 0, 0, 0.5);
     padding: 0.75rem;
     border-radius: 0.5rem;
     backdrop-filter: blur(10px);
+    
+    @media (min-width: 768px) {
+      bottom: 2rem;
+      right: 2rem;
+    }
   }
 `;
 
