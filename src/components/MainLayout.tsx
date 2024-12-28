@@ -52,7 +52,7 @@ const MainLayout: React.FC = () => {
       <div className="fixed inset-0 bg-noise-pattern opacity-[0.015] pointer-events-none"></div>
 
       {/* Hero Header */}
-      <header className="relative bg-gradient-radial from-charcoal-800 to-charcoal-900 text-cream-50 pt-24 pb-38">
+      <header className="relative bg-gradient-radial from-charcoal-800 to-charcoal-900 text-cream-50 pt-24 pb-38 px-4 sm:px-0">
         {/* Texture and gradient overlays */}
         <div className="absolute inset-0 bg-texture-light opacity-[0.02]"></div>
         <div className="absolute inset-0 bg-gradient-to-t from-charcoal-900/60 to-transparent"></div>
@@ -79,7 +79,7 @@ const MainLayout: React.FC = () => {
           {/* Content */}
           <div className="flex flex-col md:flex-row items-center md:items-end space-y-16 md:space-y-0 md:space-x-24 pt-8 md:pt-0">
             {/* Portrait */}
-            <div className="w-80 h-80 md:w-[420px] md:h-[420px] flex-shrink-0">
+            <div className="w-64 h-64 sm:w-80 sm:h-80 md:w-[420px] md:h-[420px] flex-shrink-0">
               <div className="relative w-full h-full">
                 <div className="absolute -inset-6 rounded-full border border-cream-200/10"></div>
                 <div className="absolute -inset-3 rounded-full border border-cream-200/20"></div>
@@ -98,16 +98,16 @@ const MainLayout: React.FC = () => {
             {/* Text content */}
             <div className="text-center md:text-left space-y-10 flex-grow max-w-3xl">
               <div className="space-y-6">
-                <h1 className="font-display text-6xl md:text-7xl lg:text-8xl font-light tracking-tight text-cream-50">
+                <h1 className="font-display text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-light tracking-tight text-cream-50">
                   John David Smith
                 </h1>
-                <p className="font-display text-2xl md:text-3xl text-cream-200/90 tracking-wide">
+                <p className="font-display text-xl sm:text-2xl md:text-3xl text-cream-200/90 tracking-wide">
                   1950 — 2024
                 </p>
               </div>
               <div className="w-24 h-px bg-gradient-subtle from-cream-200/40 md:ml-1"></div>
               <div className="editorial-quote border-cream-200/30 text-cream-100/90">
-                <p className="font-serif text-xl md:text-2xl font-light leading-relaxed">
+                <p className="font-serif text-lg sm:text-xl md:text-2xl font-light leading-relaxed">
                   "A beautiful soul who touched countless lives with kindness, wisdom, and love.
                   Their legacy lives on in the hearts of all who knew them."
                 </p>
@@ -120,14 +120,14 @@ const MainLayout: React.FC = () => {
       </header>
 
       {/* Navigation */}
-      <nav className="sticky top-0 z-10 bg-cream-100/80 backdrop-blur-sm border-b border-sepia-200/10">
+      <nav className="sticky top-0 z-10 bg-cream-100/80 backdrop-blur-sm border-b border-sepia-200/10 overflow-x-auto">
         <div className="section-container py-0">
-          <div className="flex justify-center md:justify-start">
+          <div className="flex justify-start md:justify-start min-w-full">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => handleTabClick(tab.id)}
-                className={`px-8 py-6 text-base tracking-wide transition-all duration-300 ${
+                className={`px-4 sm:px-8 py-4 sm:py-6 text-sm sm:text-base tracking-wide transition-all duration-300 whitespace-nowrap flex-1 md:flex-none text-center ${
                   activeTab === tab.id
                     ? 'text-sepia-800 border-b-2 border-sepia-500 bg-cream-50/50'
                     : 'text-charcoal-600 hover:text-sepia-700 hover:bg-cream-50/50'
@@ -141,7 +141,7 @@ const MainLayout: React.FC = () => {
       </nav>
 
       {/* Main content */}
-      <main className="section-container relative">
+      <main className="section-container relative px-4 sm:px-6">
         <div className="absolute inset-y-0 left-1/2 transform -translate-x-1/2 w-full max-w-4xl bg-gradient-to-b from-sepia-50/30 to-transparent opacity-50 pointer-events-none"></div>
         <div className="relative space-y-48">
           <div className="animate-fade-in">
