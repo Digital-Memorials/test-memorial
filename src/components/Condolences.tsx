@@ -22,6 +22,13 @@ const BookContainer = styled.div`
   transform: perspective(2000px) rotateX(1deg);
   transform-origin: center center;
 
+  @media (max-width: 768px) {
+    flex-direction: column;
+    min-height: auto;
+    transform: none;
+    margin: 1rem auto;
+  }
+
   &::before {
     content: '';
     position: absolute;
@@ -62,11 +69,23 @@ const BookSpine = styled.div`
   transform: perspective(2000px) rotateY(-12deg);
   transform-origin: right center;
   
+  @media (max-width: 768px) {
+    width: 100%;
+    height: 24px;
+    transform: none;
+  }
+  
   &::before {
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(to right, rgba(139, 107, 77, 0.2), transparent);
+    background: linear-gradient(
+      ${props => props.theme.mediaQuery?.isMobile 
+        ? 'to bottom'
+        : 'to right'}, 
+      rgba(139, 107, 77, 0.2), 
+      transparent
+    );
   }
 
   &::after {
@@ -77,6 +96,12 @@ const BookSpine = styled.div`
     bottom: 0;
     width: 4px;
     background: linear-gradient(to right, rgba(0, 0, 0, 0.1), transparent);
+
+    @media (max-width: 768px) {
+      width: 100%;
+      height: 4px;
+      background: linear-gradient(to bottom, rgba(0, 0, 0, 0.1), transparent);
+    }
   }
 `;
 
@@ -88,27 +113,41 @@ const BookEdge = styled.div`
   transform: perspective(2000px) rotateY(12deg);
   transform-origin: left center;
 
-  /* Base gradient for depth */
+  @media (max-width: 768px) {
+    width: 100%;
+    height: 24px;
+    transform: none;
+  }
+
   &::before {
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(to right, rgba(0, 0, 0, 0.05), transparent 70%);
+    background: linear-gradient(
+      ${props => props.theme.mediaQuery?.isMobile 
+        ? 'to bottom'
+        : 'to right'}, 
+      rgba(0, 0, 0, 0.05), 
+      transparent 70%
+    );
   }
 
-  /* Vertical lines for pages */
   &::after {
     content: '';
     position: absolute;
     inset: 0;
     background-image: repeating-linear-gradient(
-      to right,
+      ${props => props.theme.mediaQuery?.isMobile 
+        ? 'to bottom'
+        : 'to right'},
       transparent,
       transparent 1px,
       rgba(0, 0, 0, 0.03) 1px,
       rgba(0, 0, 0, 0.03) 2px
     );
-    background-size: 3px 100%;
+    background-size: ${props => props.theme.mediaQuery?.isMobile 
+      ? '100% 3px'
+      : '3px 100%'};
   }
 `;
 
@@ -121,6 +160,10 @@ const MainContent = styled.div`
   box-shadow: 
     inset 1px 0 1px rgba(0, 0, 0, 0.03),
     inset -1px 0 1px rgba(0, 0, 0, 0.03);
+
+  @media (max-width: 768px) {
+    padding: 2rem 1rem;
+  }
 `;
 
 const Header = styled.div`
@@ -128,6 +171,11 @@ const Header = styled.div`
   margin-bottom: 4rem;
   position: relative;
   padding: 2rem 0;
+  
+  @media (max-width: 768px) {
+    margin-bottom: 2rem;
+    padding: 1rem 0;
+  }
   
   &::before,
   &::after {
@@ -144,6 +192,10 @@ const Header = styled.div`
       rgba(139, 107, 77, 0.3) 80%,
       transparent
     );
+
+    @media (max-width: 768px) {
+      width: 120px;
+    }
   }
 
   &::before {
@@ -163,6 +215,11 @@ const Title = styled.h2`
   font-weight: normal;
   letter-spacing: -0.02em;
   line-height: 1.2;
+
+  @media (max-width: 768px) {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+  }
 `;
 
 const Subtitle = styled.p`
@@ -179,6 +236,10 @@ const FormSection = styled.div`
   max-width: 64rem;
   margin: 0 auto;
   padding: 0 2rem;
+
+  @media (max-width: 768px) {
+    padding: 0 1rem;
+  }
 `;
 
 const FormLabel = styled.label`
@@ -195,6 +256,10 @@ const Form = styled.form`
   flex-direction: column;
   gap: 3rem;
   width: 100%;
+
+  @media (max-width: 768px) {
+    gap: 1.5rem;
+  }
 `;
 
 const FormGroup = styled.div`
@@ -204,6 +269,10 @@ const FormGroup = styled.div`
 
   &:first-of-type {
     width: 50%;
+
+    @media (max-width: 768px) {
+      width: 100%;
+    }
   }
 `;
 
@@ -308,6 +377,12 @@ const CondolenceList = styled.div`
   flex-direction: column;
   gap: 2rem;
   padding: 0 2rem;
+
+  @media (max-width: 768px) {
+    margin: 3rem auto 0;
+    padding: 0 1rem;
+    gap: 1.5rem;
+  }
 `;
 
 const CondolenceCard = styled.article`
@@ -344,6 +419,10 @@ const CardContent = styled.div`
     0 4px 6px -1px rgba(0, 0, 0, 0.1),
     0 2px 4px -1px rgba(0, 0, 0, 0.06);
   transition: all 0.3s ease;
+
+  @media (max-width: 768px) {
+    padding: 1.5rem;
+  }
 
   &:hover {
     box-shadow: 
@@ -408,6 +487,11 @@ const MessageText = styled.blockquote`
   line-height: 1.6;
   font-style: italic;
   margin: 0;
+
+  @media (max-width: 768px) {
+    font-size: 1rem;
+    line-height: 1.5;
+  }
 `;
 
 const CardFooter = styled.footer`
