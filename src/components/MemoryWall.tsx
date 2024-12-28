@@ -586,7 +586,8 @@ const FormContainer = styled.div<FormContainerProps>`
   opacity: ${props => props.isVisible ? '1' : '0'};
   overflow: hidden;
   transition: all 0.3s ease;
-  margin-bottom: ${props => props.isVisible ? '3rem' : '0'};
+  margin-bottom: ${props => props.isVisible ? '6rem' : '0'};
+  padding-bottom: ${props => props.isVisible ? '3rem' : '0'};
 `;
 
 const ButtonContainer = styled.div`
@@ -690,6 +691,12 @@ const ImageControlButton = styled.button`
   cursor: pointer;
   color: white;
   transition: all 0.3s ease;
+
+  &[title="Full screen"] {
+    @media (max-width: 768px) {
+      display: none;
+    }
+  }
 
   &:hover {
     background: rgba(0, 0, 0, 0.7);
