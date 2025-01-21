@@ -23,8 +23,11 @@
       },
       "storage": {
         "condolencesTable": {},
-        "memorialmedia": {},
-        "memoriesTable": {}
+        "memoriesTable": {},
+        "memorialmedia": {}
+      },
+      "api": {
+        "memorialAPI": {}
       }
     }
   },

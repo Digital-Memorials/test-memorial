@@ -1,6 +1,7 @@
 {
   "resourceName": "memorialmedia",
-  "policyUUID": "20ac50f8",
+  "policyUUID": "5dcc5230",
+  "bucketName": "digitalmemorialbb77a4b6c54d4941977c966eb5eef150",
   "storageAccess": "auth",
   "guestAccess": [],
   "authAccess": [
@@ -8,6 +9,5 @@
     "READ",
     "DELETE"
   ],
-  "triggerFunction": "NONE",
   "groupAccess": {}
 }
