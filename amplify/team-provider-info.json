@@ -1,4 +1,33 @@
 {
+  "master": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-digitalmemorial-master-cb10b-authRole",
+      "UnauthRoleArn": "arn:aws:iam::528802298360:role/amplify-digitalmemorial-master-cb10b-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::528802298360:role/amplify-digitalmemorial-master-cb10b-authRole",
+      "Region": "eu-west-1",
+      "DeploymentBucketName": "amplify-digitalmemorial-master-cb10b-deployment",
+      "UnauthRoleName": "amplify-digitalmemorial-master-cb10b-unauthRole",
+      "StackName": "amplify-digitalmemorial-master-cb10b",
+      "StackId": "arn:aws:cloudformation:eu-west-1:528802298360:stack/amplify-digitalmemorial-master-cb10b/f5db2830-be26-11ef-891b-06ddf1fe9003",
+      "AmplifyAppId": "dwytj4n8j6xcw"
+    },
+    "categories": {
+      "auth": {
+        "digitalmemorial0a684824": {}
+      },
+      "function": {
+        "memorialFunction": {
+          "deploymentBucketName": "amplify-digitalmemorial-master-cb10b-deployment",
+          "s3Key": "amplify-builds/memorialFunction-6a443453443030417051-build.zip"
+        }
+      },
+      "storage": {
+        "condolencesTable": {},
+        "memorialmedia": {},
+        "memoriesTable": {}
+      }
+    }
+  },
   "dev": {
     "awscloudformation": {
       "AuthRoleName": "amplify-digitalmemorial-dev-26d34-authRole",

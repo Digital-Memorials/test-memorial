@@ -1,7 +1,6 @@
 {
   "resourceName": "memorialmedia",
   "policyUUID": "20ac50f8",
-  "bucketName": "digitalmemorial-storage-${env}",
   "storageAccess": "auth",
   "guestAccess": [],
   "authAccess": [
