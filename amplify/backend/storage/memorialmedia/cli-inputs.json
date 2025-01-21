@@ -1,13 +1,46 @@
 {
   "resourceName": "memorialmedia",
-  "policyUUID": "5dcc5230",
-  "bucketName": "digitalmemorialbb77a4b6c54d4941977c966eb5eef150",
-  "storageAccess": "auth",
-  "guestAccess": [],
+  "policyUUID": "26a52126",
+  "bucketName": "dm-mm",
+  "storageAccess": "authAndGuest",
+  "guestAccess": [
+    "READ"
+  ],
   "authAccess": [
     "CREATE_AND_UPDATE",
     "READ",
     "DELETE"
   ],
-  "groupAccess": {}
+  "triggerFunction": "NONE",
+  "groupAccess": {},
+  "s3PermissionsAuthenticatedPublic": [
+    "s3:PutObject",
+    "s3:GetObject",
+    "s3:DeleteObject"
+  ],
+  "s3PublicPolicy": {
+    "guestAccess": {
+      "permissions": [
+        "s3:GetObject"
+      ],
+      "prefix": "public/*"
+    }
+  },
+  "s3ReadPolicy": {
+    "allowPublic": true
+  },
+  "s3PermissionsGuestPublic": [
+    "s3:GetObject"
+  ],
+  "corsConfiguration": {
+    "CORSRules": [
+      {
+        "AllowedHeaders": ["*"],
+        "AllowedMethods": ["GET", "HEAD", "PUT", "POST", "DELETE"],
+        "AllowedOrigins": ["*"],
+        "ExposedHeaders": ["x-amz-server-side-encryption", "x-amz-request-id", "x-amz-id-2", "ETag"],
+        "MaxAge": 3000
+      }
+    ]
+  }
 }

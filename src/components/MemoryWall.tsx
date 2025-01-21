@@ -578,16 +578,16 @@ const UploadButton = styled.button`
 `;
 
 interface FormContainerProps {
-  isVisible: boolean;
+  $isVisible: boolean;
 }
 
 const FormContainer = styled.div<FormContainerProps>`
-  max-height: ${props => props.isVisible ? '1000px' : '0'};
-  opacity: ${props => props.isVisible ? '1' : '0'};
+  max-height: ${props => props.$isVisible ? '1000px' : '0'};
+  opacity: ${props => props.$isVisible ? '1' : '0'};
   overflow: hidden;
   transition: all 0.3s ease;
-  margin-bottom: ${props => props.isVisible ? '6rem' : '0'};
-  padding-bottom: ${props => props.isVisible ? '3rem' : '0'};
+  margin-bottom: ${props => props.$isVisible ? '6rem' : '0'};
+  padding-bottom: ${props => props.$isVisible ? '3rem' : '0'};
 `;
 
 const ButtonContainer = styled.div`
@@ -713,7 +713,7 @@ const ImageControlButton = styled.button`
   }
 `;
 
-const FullScreenImage = styled.div<{ isFullScreen: boolean }>`
+const FullScreenImage = styled.div<{ $isFullScreen: boolean }>`
   position: fixed;
   top: 0;
   left: 0;
@@ -723,10 +723,10 @@ const FullScreenImage = styled.div<{ isFullScreen: boolean }>`
   height: 100%;
   background-color: rgba(0, 0, 0, 0.95);
   z-index: 9999;
-  display: ${props => props.isFullScreen ? 'flex' : 'none'};
+  display: ${props => props.$isFullScreen ? 'flex' : 'none'};
   align-items: center;
   justify-content: center;
-  touch-action: none; /* Prevent default touch behaviors */
+  touch-action: none;
 
   img {
     max-width: 100vw;
@@ -1061,7 +1061,7 @@ const MemoryWall: React.FC = () => {
         )}
       </ButtonContainer>
 
-      <FormContainer isVisible={isFormVisible}>
+      <FormContainer $isVisible={isFormVisible}>
         <Form onSubmit={handleSubmit}>
           <TextArea
             value={message}
@@ -1096,7 +1096,7 @@ const MemoryWall: React.FC = () => {
       </FormContainer>
 
       <FullScreenImage 
-        isFullScreen={!!selectedImage} 
+        $isFullScreen={!!selectedImage} 
         onClick={handleExitFullScreen}
         className="fullscreen-container"
       >
