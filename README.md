@@ -71,7 +71,7 @@ For each client project, we create a new branch from their chosen template and c
    git clone https://github.com/Digital-Memorials/test-memorial.git client-name-memorial
    cd client-name-memorial
    
-   # Remove the template's git history and initialize new repository
+   # Remove the templates git history and initialize new repository
    rm -rf .git
    git init
    
@@ -126,13 +126,13 @@ When working on different memorial sites:
 2. Verify Git repository:
    ```bash
    git remote -v
-   # Should show the client's GitHub repository, not the template
+   # Should show the clients GitHub repository, not the template
    ```
 
 3. Verify Amplify environment:
    ```bash
    amplify status
-   # Should show the client's environment name and resources
+   # Should show the clients environment name and resources
    ```
 
 ## Project Structure
