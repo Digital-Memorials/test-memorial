@@ -18,7 +18,8 @@
     "autoprefixer": "^10.4.20",
     "aws-amplify": "^6.0.0",
     "axios": "^1.7.9",
-    "postcss": "^8.5.1",
+    "nth-check": "^2.0.1",
+    "postcss": "^8.4.31",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.14.2",
@@ -57,5 +58,9 @@
     "@tailwindcss/forms": "^0.5.9",
     "@tailwindcss/typography": "^0.5.15",
     "postcss-loader": "^8.1.1"
+  },
+  "resolutions": {
+    "postcss": "^8.4.31",
+    "nth-check": "^2.0.1"
   }
 }
