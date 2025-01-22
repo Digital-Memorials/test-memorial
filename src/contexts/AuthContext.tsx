@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { signIn, signUp, signOut, getCurrentUser, fetchUserAttributes, confirmSignUp, resetPassword, confirmResetPassword } from 'aws-amplify/auth';
+import { signIn, signUp, signOut, getCurrentUser, fetchUserAttributes, confirmSignUp, resetPassword, confirmResetPassword, fetchAuthSession } from 'aws-amplify/auth';
 import { AuthError } from '@aws-amplify/auth';
 import { AuthUser } from '../types';
 
@@ -34,16 +34,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setIsLoading(true);
       const userData = await getCurrentUser();
       const attributes = await fetchUserAttributes();
+      const session = await fetchAuthSession();
       
       if (!attributes.email) {
         throw new Error('Email is required');
       }
 
+      // Check if user is in admin group
+      const groups = session.tokens?.accessToken.payload['cognito:groups'] as string[] || [];
+      const isAdmin = groups.includes('admin');
+
       setUser({
         id: userData.userId,
         name: attributes.name || 'Anonymous',
         email: attributes.email,
-        emailVerified: attributes.email_verified === 'true'
+        emailVerified: attributes.email_verified === 'true',
+        isAdmin
       });
     } catch (err) {
       if (err instanceof AuthError) {

@@ -1,0 +1,198 @@
+{
+  "providers": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-digitalmemorial-dev-26d34-authRole",
+      "UnauthRoleArn": "arn:aws:iam::528802298360:role/amplify-digitalmemorial-dev-26d34-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::528802298360:role/amplify-digitalmemorial-dev-26d34-authRole",
+      "Region": "eu-west-1",
+      "DeploymentBucketName": "amplify-digitalmemorial-dev-26d34-deployment",
+      "UnauthRoleName": "amplify-digitalmemorial-dev-26d34-unauthRole",
+      "StackName": "amplify-digitalmemorial-dev-26d34",
+      "StackId": "arn:aws:cloudformation:eu-west-1:528802298360:stack/amplify-digitalmemorial-dev-26d34/a6d071f0-bd95-11ef-b3fb-0a0b9e905b39",
+      "AmplifyAppId": "dwytj4n8j6xcw"
+    }
+  },
+  "storage": {
+    "memoriesTable": {
+      "service": "DynamoDB",
+      "providerPlugin": "awscloudformation",
+      "providerMetadata": {
+        "s3TemplateURL": "https://s3.amazonaws.com/amplify-digitalmemorial-dev-26d34-deployment/amplify-cfn-templates/storage/memoriesTable-cloudformation-template.json",
+        "logicalId": "storagememoriesTable"
+      },
+      "lastPushTimeStamp": "2024-12-19T13:55:19.266Z",
+      "output": {
+        "PartitionKeyName": "id",
+        "Region": "eu-west-1",
+        "Arn": "arn:aws:dynamodb:eu-west-1:528802298360:table/memoriesTable-dev",
+        "StreamArn": "arn:aws:dynamodb:eu-west-1:528802298360:table/memoriesTable-dev/stream/2024-12-19T00:04:31.654",
+        "PartitionKeyType": "S",
+        "Name": "memoriesTable-dev"
+      },
+      "lastPushDirHash": "9/i0XeDOXfnAUy7PdF95C7ZWT5c="
+    },
+    "condolencesTable": {
+      "service": "DynamoDB",
+      "providerPlugin": "awscloudformation",
+      "providerMetadata": {
+        "s3TemplateURL": "https://s3.amazonaws.com/amplify-digitalmemorial-dev-26d34-deployment/amplify-cfn-templates/storage/condolencesTable-cloudformation-template.json",
+        "logicalId": "storagecondolencesTable"
+      },
+      "lastPushTimeStamp": "2024-12-19T13:55:19.283Z",
+      "output": {
+        "PartitionKeyName": "id",
+        "Region": "eu-west-1",
+        "Arn": "arn:aws:dynamodb:eu-west-1:528802298360:table/condolencesTable-dev",
+        "StreamArn": "arn:aws:dynamodb:eu-west-1:528802298360:table/condolencesTable-dev/stream/2024-12-19T00:04:31.795",
+        "PartitionKeyType": "S",
+        "Name": "condolencesTable-dev"
+      },
+      "lastPushDirHash": "mM8C8E013faPw3po0oZgZ/1soS0="
+    },
+    "memorialmedia": {
+      "service": "S3",
+      "providerPlugin": "awscloudformation",
+      "dependsOn": [],
+      "lastPushTimeStamp": "2024-12-19T13:55:20.051Z",
+      "providerMetadata": {
+        "s3TemplateURL": "https://s3.amazonaws.com/amplify-digitalmemorial-dev-26d34-deployment/amplify-cfn-templates/storage/cloudformation-template.json",
+        "logicalId": "storagememorialmedia"
+      },
+      "output": {
+        "BucketName": "digital-memorial-media26d34-dev",
+        "Region": "eu-west-1"
+      },
+      "lastPushDirHash": "n+w7Fp349EYoG8QIiM670o6UDHk="
+    }
+  },
+  "auth": {
+    "digitalmemorial0a684824": {
+      "service": "Cognito",
+      "providerPlugin": "awscloudformation",
+      "dependsOn": [],
+      "customAuth": false,
+      "frontendAuthConfig": {
+        "socialProviders": [],
+        "usernameAttributes": [
+          "EMAIL"
+        ],
+        "signupAttributes": [
+          "EMAIL"
+        ],
+        "passwordProtectionSettings": {
+          "passwordPolicyMinLength": 8,
+          "passwordPolicyCharacters": []
+        },
+        "mfaConfiguration": "OFF",
+        "mfaTypes": [
+          "SMS"
+        ],
+        "verificationMechanisms": [
+          "EMAIL"
+        ]
+      },
+      "providerMetadata": {
+        "s3TemplateURL": "https://s3.amazonaws.com/amplify-digitalmemorial-dev-26d34-deployment/amplify-cfn-templates/auth/digitalmemorial0a684824-cloudformation-template.json",
+        "logicalId": "authdigitalmemorial0a684824"
+      },
+      "lastPushTimeStamp": "2024-12-19T13:55:19.315Z",
+      "output": {
+        "UserPoolId": "eu-west-1_X9lcPIvOe",
+        "AppClientIDWeb": "6mcvha75lcedqv48phhfgnv41t",
+        "AppClientID": "284qit899a2488aiamg03r4t19",
+        "IdentityPoolId": "eu-west-1:c4ef7bb9-9276-4d32-9037-ed19a9bddcee",
+        "UserPoolArn": "arn:aws:cognito-idp:eu-west-1:528802298360:userpool/eu-west-1_X9lcPIvOe",
+        "IdentityPoolName": "digitalmemorial0a684824_identitypool_0a684824__dev",
+        "UserPoolName": "digitalmemorial0a684824_userpool_0a684824"
+      },
+      "lastPushDirHash": "v9T9Nb4g0g8ZrRUTqzFWeDul+38="
+    }
+  },
+  "function": {
+    "memorialFunction": {
+      "build": true,
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda",
+      "dependsOn": [
+        {
+          "category": "storage",
+          "resourceName": "memoriesTable",
+          "attributes": [
+            "Name",
+            "Arn"
+          ],
+          "attributeEnvMap": {
+            "Name": "TABLE_NAME",
+            "Arn": "TABLE_ARN"
+          }
+        },
+        {
+          "category": "storage",
+          "resourceName": "memoriesTable",
+          "attributes": [
+            "Name",
+            "Arn",
+            "StreamArn"
+          ]
+        },
+        {
+          "category": "storage",
+          "resourceName": "condolencesTable",
+          "attributes": [
+            "Name",
+            "Arn",
+            "StreamArn"
+          ]
+        }
+      ],
+      "output": {
+        "LambdaExecutionRoleArn": "arn:aws:iam::528802298360:role/digitalmemorialLambdaRolef45f3db9-dev",
+        "Region": "eu-west-1",
+        "Arn": "arn:aws:lambda:eu-west-1:528802298360:function:memorialFunction-dev",
+        "Name": "memorialFunction-dev",
+        "LambdaExecutionRole": "digitalmemorialLambdaRolef45f3db9-dev"
+      },
+      "lastPushTimeStamp": "2024-12-19T13:55:19.329Z",
+      "providerMetadata": {
+        "s3TemplateURL": "https://s3.amazonaws.com/amplify-digitalmemorial-dev-26d34-deployment/amplify-cfn-templates/function/memorialFunction-cloudformation-template.json",
+        "logicalId": "functionmemorialFunction"
+      },
+      "lastBuildTimeStamp": "2024-12-19T01:22:33.495Z",
+      "lastBuildType": "PROD",
+      "lastPackageTimeStamp": "2024-12-19T01:22:35.216Z",
+      "distZipFilename": "memorialFunction-737a6849484e4c757772-build.zip",
+      "s3Bucket": {
+        "deploymentBucketName": "amplify-digitalmemorial-dev-26d34-deployment",
+        "s3Key": "amplify-builds/memorialFunction-737a6849484e4c757772-build.zip"
+      },
+      "lastPushDirHash": "yPmoLNyQPR+xoaBZ2jvOVfEcoIE="
+    }
+  },
+  "api": {
+    "memorialAPI": {
+      "service": "API Gateway",
+      "providerPlugin": "awscloudformation",
+      "dependsOn": [
+        {
+          "category": "function",
+          "resourceName": "memorialFunction",
+          "attributes": [
+            "Name",
+            "Arn"
+          ]
+        }
+      ],
+      "output": {
+        "ApiName": "memorialAPI",
+        "RootUrl": "https://kafcz1kbt2.execute-api.eu-west-1.amazonaws.com/dev",
+        "ApiId": "kafcz1kbt2"
+      },
+      "lastPushTimeStamp": "2024-12-19T13:55:19.343Z",
+      "providerMetadata": {
+        "s3TemplateURL": "https://s3.amazonaws.com/amplify-digitalmemorial-dev-26d34-deployment/amplify-cfn-templates/api/memorialAPI-cloudformation-template.json",
+        "logicalId": "apimemorialAPI"
+      },
+      "lastPushDirHash": "zRtZxnZDVtgyrC6sa3kdERF9QKc="
+    }
+  }
+}

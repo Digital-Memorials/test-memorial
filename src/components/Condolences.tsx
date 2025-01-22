@@ -827,7 +827,7 @@ const Condolences: React.FC = () => {
                         <RelationText>{condolence.relation}</RelationText>
                       )}
                     </AuthorDetails>
-                    {user && user.id === condolence.userId && (
+                    {user && (user.id === condolence.userId || user.isAdmin) && (
                       <CardDeleteButton
                         onClick={() => handleDelete(condolence.id)}
                         title="Delete condolence"

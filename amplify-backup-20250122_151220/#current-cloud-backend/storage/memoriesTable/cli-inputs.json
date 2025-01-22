@@ -1,0 +1,10 @@
+{
+  "resourceName": "memoriesTable",
+  "tableName": "memoriesTable",
+  "partitionKey": {
+    "fieldName": "id",
+    "fieldType": "string"
+  },
+  "gsi": [],
+  "triggerFunctions": []
+}

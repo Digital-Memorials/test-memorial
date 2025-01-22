@@ -1,0 +1,10 @@
+{
+  "resourceName": "condolencesTable",
+  "tableName": "condolencesTable",
+  "partitionKey": {
+    "fieldName": "id",
+    "fieldType": "string"
+  },
+  "gsi": [],
+  "triggerFunctions": []
+}

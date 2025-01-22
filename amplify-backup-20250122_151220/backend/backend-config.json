@@ -1,0 +1,20 @@
+{
+  "parameters": {
+    "AMPLIFY_function_memorialFunction_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "memorialFunction"
+        }
+      ]
+    },
+    "AMPLIFY_function_memorialFunction_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "memorialFunction"
+        }
+      ]
+    }
+  }
+}

@@ -981,7 +981,7 @@ const MemoryWall: React.FC = () => {
         <MemoriesGrid>
           {memories.map((memory) => (
             <MemoryCard key={memory.id}>
-              {user && user.id === memory.userId && (
+              {user && (user.id === memory.userId || user.isAdmin) && (
                 <DeleteButton
                   onClick={() => handleDelete(memory.id)}
                   title="Delete memory"

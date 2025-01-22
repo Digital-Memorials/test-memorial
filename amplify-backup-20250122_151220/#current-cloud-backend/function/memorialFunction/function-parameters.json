@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "storage": {
+      "memoriesTable": [
+        "create",
+        "read",
+        "update",
+        "delete"
+      ],
+      "condolencesTable": [
+        "create",
+        "read",
+        "update",
+        "delete"
+      ]
+    }
+  },
+  "lambdaLayers": []
+}
