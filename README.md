@@ -109,7 +109,46 @@ For each client project, we create a new branch from their chosen template and c
    ```
    This creates isolated AWS resources specific to this client's environment.
 
-5. Start the development server:
+5. Configure S3 Bucket Access:
+   - Go to AWS Console > S3
+   - Find the newly created bucket 
+   - Under "Block Public Access settings":
+     - Click "Edit"
+     - Uncheck "Block all public access"
+     - Save changes
+   - Under "Bucket Policy", add the following (replace `[BUCKET-NAME]`):
+   ```json
+   {
+       "Version": "2012-10-17",
+       "Statement": [
+           {
+               "Sid": "PublicReadGetObject",
+               "Effect": "Allow",
+               "Principal": "*",
+               "Action": "s3:GetObject",
+               "Resource": "arn:aws:s3:::[BUCKET-NAME]/*"
+           }
+       ]
+   }
+   ```
+
+6. Set Up Admin Access:
+   - Go to AWS Console > Cognito > User Pools
+   - Select the newly created user pool
+   - Under "Groups":
+     - Click "Create group"
+     - Name it "admin"
+     - Set high precedence (e.g., 1)
+     - Create the group
+   - To add an admin user:
+     - Create a user account through the app
+     - Go back to Cognito
+     - Find the user in "Users"
+     - Click "Add user to group"
+     - Select "admin"
+     - Confirm
+
+7. Start the development server:
    ```bash
    yarn start
    ```
