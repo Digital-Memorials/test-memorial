@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
 import Obituary from './Obituary';
 import Gallery from './Gallery';
 import Timeline from './Timeline';
@@ -18,7 +17,6 @@ type Tab = {
 const MainLayout: React.FC = () => {
   const { user, logout } = useAuth();
   const [activeTab, setActiveTab] = useState<string>('obituary');
-  const navigate = useNavigate();
 
   const tabs: Tab[] = [
     { id: 'obituary', label: 'Life Story' },

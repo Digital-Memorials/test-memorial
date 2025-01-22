@@ -1,6 +1,6 @@
 import { get, post, del } from '@aws-amplify/api';
 import { uploadData, getUrl } from 'aws-amplify/storage';
-import { getCurrentUser, fetchAuthSession } from 'aws-amplify/auth';
+import { fetchAuthSession } from 'aws-amplify/auth';
 import { Condolence } from '../types';
 
 // Types
@@ -9,8 +9,8 @@ export interface Memory {
   userId: string;
   name: string;
   message: string;
-  mediaType: string;
-  mediaUrl: string;
+  mediaType: string | null;
+  mediaUrl: string | null;
   createdAt: string;
 }
 
@@ -38,8 +38,8 @@ const isMemory = (obj: any): obj is Memory => {
     typeof obj.userId === 'string' &&
     typeof obj.name === 'string' &&
     typeof obj.message === 'string' &&
-    typeof obj.mediaType === 'string' &&
-    typeof obj.mediaUrl === 'string' &&
+    (obj.mediaType === null || typeof obj.mediaType === 'string') &&
+    (obj.mediaUrl === null || typeof obj.mediaUrl === 'string') &&
     typeof obj.createdAt === 'string' &&
     new Date(obj.createdAt).toString() !== 'Invalid Date'
   );

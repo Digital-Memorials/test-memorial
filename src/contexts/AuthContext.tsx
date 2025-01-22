@@ -73,6 +73,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = async (email: string, password: string) => {
     try {
       setError(null);
+      
+      // First, try to sign out any existing user
+      try {
+        await signOut({ global: true });
+      } catch (err) {
+        // Ignore errors during sign out
+        console.log('Sign out during login attempt:', err);
+      }
+
       const { isSignedIn, nextStep } = await signIn({ username: email, password });
       
       if (!isSignedIn) {
@@ -86,7 +95,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       // Even if sign in succeeds, we need to verify the email is confirmed
-      const userData = await getCurrentUser();
       const attributes = await fetchUserAttributes();
       
       if (attributes.email_verified !== 'true') {
